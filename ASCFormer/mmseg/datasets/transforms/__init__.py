@@ -15,7 +15,7 @@ from .transforms import (CLAHE, AdjustGamma, BioMedical3DPad,
                          SegRescale,
                          RandomCropWithDCT, ResizeWithDCT, ResizeShortestEdgeWithDCT, RandomCropWithExtra,
                          RandomFlipWithDCT, PadWithDCT, ProcessDCT, DynamicResize,
-                         ELA, SubtractData, AssignValue)
+                         ELA, HaarDWT, SubtractData, AssignValue)
 
 
 # yapf: enable
@@ -32,5 +32,5 @@ __all__ = [
     'LoadDCTFromJPEGIO',
     'RandomCropWithDCT', 'RandomFlipWithDCT', 'ResizeWithDCT', 'ResizeShortestEdgeWithDCT',
     'ProcessDCT', 'PadWithDCT', 'DynamicResize',
-    'ELA', 'SubtractData', 'AssignValue'
+    'ELA', 'HaarDWT', 'SubtractData', 'AssignValue'
 ]

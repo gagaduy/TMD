@@ -5,6 +5,7 @@ import os.path as osp
 import mmcv
 import numpy as np
 import pytest
+from mmengine.config import Config
 from mmengine.registry import init_default_scope
 from PIL import Image
 
@@ -15,6 +16,33 @@ from mmseg.datasets.transforms import (LoadBiomedicalData,
 from mmseg.registry import TRANSFORMS
 
 init_default_scope('mmseg')
+
+
+def test_haar_dwt_extracts_zero_high_frequency_from_uniform_image():
+    transform = TRANSFORMS.build(dict(type='HaarDWT'))
+    image = np.full((8, 8, 3), 128, dtype=np.uint8)
+
+    result = transform(dict(img=image))
+
+    assert result['dwt'].shape == (8, 8, 3)
+    assert result['dwt'].dtype == np.float32
+    assert np.allclose(result['dwt'], 0.0)
+
+
+def test_haar_dwt_is_exported_by_the_transforms_package():
+    from mmseg.datasets.transforms import HaarDWT
+
+    assert HaarDWT.__name__ == 'HaarDWT'
+
+
+def test_dwt_config_adds_wavelet_domain_to_the_auxiliary_stream():
+    config = Config.fromfile(
+        osp.join(osp.dirname(__file__), '../../configs/ascformer/ascformer_rtm_dwt.py'))
+
+    assert config.model.backbone.backbone_extra.modals == ['dct', 'srm', 'ela', 'dwt']
+    assert config.model.backbone.backbone_extra.in_modals == (3, 4, 4, 4)
+    assert 'dwt' in config.train_pipeline[-1].extra_keys
+    assert any(step.type == 'HaarDWT' for step in config.train_pipeline)
 
 
 def test_resize():
@@ -1184,4 +1212,3 @@ def test_connectivity_transform():
 
     for i in range(8):
         print(results['conn_map'][i])
-

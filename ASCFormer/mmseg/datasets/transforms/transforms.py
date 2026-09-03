@@ -3637,6 +3637,48 @@ class ELA(BaseTransform):
 
 
 @TRANSFORMS.register_module()
+class HaarDWT(BaseTransform):
+    """Extract one-level Haar high-frequency sub-bands from an image.
+
+    The three output channels preserve horizontal, vertical, and diagonal
+    detail cues while keeping the original image resolution for alignment with
+    the other forensic domains.
+    """
+
+    def __init__(self, channel='Y', key=None):
+        self.channel = channel
+        self.key = key
+        self.c_table = {'Y': 0, 'U': 1, 'V': 2}
+        if channel not in self.c_table:
+            raise ValueError(f'Unsupported color channel: {channel}')
+
+    def transform(self, results: dict) -> dict:
+        source_key = self.key or 'img'
+        image = results[source_key]
+        if image.ndim == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)[..., self.c_table[self.channel]]
+        image = image.astype(np.float32)
+
+        height, width = image.shape[:2]
+        padded = cv2.copyMakeBorder(
+            image, 0, height % 2, 0, width % 2, cv2.BORDER_REFLECT_101)
+        top_left = padded[0::2, 0::2]
+        top_right = padded[0::2, 1::2]
+        bottom_left = padded[1::2, 0::2]
+        bottom_right = padded[1::2, 1::2]
+
+        horizontal = (top_left + top_right - bottom_left - bottom_right) / 2
+        vertical = (top_left - top_right + bottom_left - bottom_right) / 2
+        diagonal = (top_left - top_right - bottom_left + bottom_right) / 2
+        dwt = np.stack((horizontal, vertical, diagonal), axis=-1)
+        dwt = cv2.resize(dwt, (width, height), interpolation=cv2.INTER_NEAREST)
+
+        target_key = f'{self.key}_dwt' if self.key else 'dwt'
+        results[target_key] = dwt.astype(np.float32, copy=False)
+        return results
+
+
+@TRANSFORMS.register_module()
 class SubtractData(BaseTransform):
     def __init__(self, key1, key2, sub_key=None):
         self.key1 = key1
@@ -3674,4 +3716,3 @@ class AssignValue(BaseTransform):
         repr_str += f'(source={self.source}, ' \
                     f'target={self.target})'
         return repr_str
-
