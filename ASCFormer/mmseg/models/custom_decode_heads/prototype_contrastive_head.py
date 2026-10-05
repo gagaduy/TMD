@@ -40,6 +40,13 @@ class PrototypeContrastiveHead(BaseDecodeHead):
                  loss_weight_sep=0.01,
                  up_decode=True,
                  **kwargs):
+        # Filter out any legacy memory bank kwargs passed from config inheritance
+        legacy_keys = ['use_memory', 'max_memory_step', 'cl_sampler', 'max_points',
+                       'max_memory_size', 'loss_const', 'min_points', 'batch_cl',
+                       'multi_layer_cl', 'save_feat', 'upsample_first', 'field_mode']
+        for k in legacy_keys:
+            kwargs.pop(k, None)
+
         super().__init__(input_transform='multiple_select', **kwargs)
 
         self.interpolate_mode = interpolate_mode

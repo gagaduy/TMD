@@ -5,6 +5,7 @@ norm_cfg = dict(type='SyncBN', requires_grad=True)
 
 model = dict(
     decode_head=dict(
+        _delete_=True,
         type='PrototypeContrastiveHead',
         in_channels=[32, 64, 160, 256],
         in_index=[0, 1, 2, 3],
