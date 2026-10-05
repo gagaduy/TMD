@@ -220,7 +220,10 @@ class MyModelFull(BaseSegmentor):
 
 
         if self.merge_input:
-            inputs = [inputs, y]
+            if isinstance(extras, dict) and 'ocr' in extras:
+                inputs = [inputs, y, extras['ocr']]
+            else:
+                inputs = [inputs, y]
 
         x = self.extract_feat(inputs)
         if self.with_backbone_sec:

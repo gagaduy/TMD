@@ -3,7 +3,8 @@ from .formatting import PackSegInputs, PackSegInputsWithExtra
 from .loading import (LoadAnnotations, LoadBiomedicalAnnotation,
                       LoadBiomedicalData, LoadBiomedicalImageFromFile,
                       LoadImageFromNDArray,
-                      LoadDCTFromJPEGIO)
+                      LoadDCTFromJPEGIO,
+                      LoadOCRSpatialFromFile)
 # yapf: disable
 from .transforms import (CLAHE, AdjustGamma, BioMedical3DPad,
                          BioMedical3DRandomCrop, BioMedical3DRandomFlip,
@@ -30,6 +31,7 @@ __all__ = [
     'RandomRotFlip', 'RandomCropWithExtra', 'RandomRotate90',
     'PackSegInputsWithExtra',
     'LoadDCTFromJPEGIO',
+    'LoadOCRSpatialFromFile',
     'RandomCropWithDCT', 'RandomFlipWithDCT', 'ResizeWithDCT', 'ResizeShortestEdgeWithDCT',
     'ProcessDCT', 'PadWithDCT', 'DynamicResize',
     'ELA', 'SubtractData', 'AssignValue'

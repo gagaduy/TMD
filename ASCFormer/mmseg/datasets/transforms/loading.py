@@ -14,6 +14,7 @@ from mmseg.utils import datafrombytes
 
 import jpegio
 import os.path as osp
+import cv2
 
 
 @TRANSFORMS.register_module()
@@ -653,5 +654,60 @@ class LoadDCTFromJPEGIO(BaseTransform):
                     f"imdecode_backend='{self.imdecode_backend}', "
                     f'file_client_args={self.file_client_args})')
         return repr_str
+
+
+@TRANSFORMS.register_module()
+class LoadOCRSpatialFromFile(BaseTransform):
+    """Load pre-extracted 3-channel OCR spatial maps (Region, Boundary, Distance).
+
+    Required Keys:
+    - img_path
+    - img
+
+    Modified Keys:
+    - ocr (np.ndarray of shape H, W, 3, float32 normalized to [0, 1])
+    """
+
+    def __init__(self,
+                 ocr_dir: str = 'ASCFormer/data/ttd/RealTextMan/ocr_spatial',
+                 key: str = 'ocr',
+                 to_float32: bool = True):
+        self.ocr_dir = ocr_dir
+        self.key = key
+        self.to_float32 = to_float32
+
+    def transform(self, results: dict) -> dict:
+        img_path = results['img_path']
+        base_name = osp.splitext(osp.basename(img_path))[0]
+        ocr_path = osp.join(self.ocr_dir, f'{base_name}.png')
+
+        if osp.exists(ocr_path):
+            ocr_map = cv2.imread(ocr_path, cv2.IMREAD_COLOR)
+            if ocr_map is None:
+                h, w = results['img'].shape[:2]
+                ocr_map = np.zeros((h, w, 3), dtype=np.uint8)
+        else:
+            h, w = results['img'].shape[:2]
+            ocr_map = np.zeros((h, w, 3), dtype=np.uint8)
+
+        # Synchronize with earlier flip if already applied
+        if results.get('flip', False):
+            direction = results.get('flip_direction', 'horizontal')
+            if direction == 'horizontal':
+                ocr_map = np.flip(ocr_map, axis=1)
+            elif direction == 'vertical':
+                ocr_map = np.flip(ocr_map, axis=0)
+            elif direction == 'diagonal':
+                ocr_map = np.flip(np.flip(ocr_map, axis=0), axis=1)
+
+        if self.to_float32:
+            ocr_map = ocr_map.astype(np.float32) / 255.0
+
+        results[self.key] = ocr_map
+        return results
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(ocr_dir={self.ocr_dir}, key={self.key})'
+
 
 
