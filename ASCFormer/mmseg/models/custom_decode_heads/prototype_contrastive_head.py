@@ -141,7 +141,20 @@ class PrototypeContrastiveHead(BaseDecodeHead):
         seg_out = self.seg_proj(seg_out)
         seg_logits = self.cls_seg(seg_out)
 
+        # Prototypical logit fusion: empower segmentation with learned prototypes
+        if self.proto_initialized.all():
+            feats_norm = F.normalize(feats, dim=1)
+            prototypes = F.normalize(self.prototypes, dim=1)
+            proto_logits = torch.einsum('bchw, kc -> bkhw', feats_norm, prototypes) / self.temperature
+            proto_logits = resize(
+                proto_logits,
+                size=seg_logits.shape[2:],
+                mode=self.interpolate_mode,
+                align_corners=self.align_corners)
+            seg_logits = seg_logits + 0.5 * proto_logits
+
         return seg_logits, feats
+
 
     def forward_infer(self, inputs):
         """Inference forward pass."""
