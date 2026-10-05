@@ -316,8 +316,10 @@ class BinaryIoUMetric(BaseMetric):
                  nan_to_num: Optional[int] = None,
                  beta: int = 1,
                  collect_device: str = 'cpu',
-                 prefix: Optional[str] = None) -> None:
+                 prefix: Optional[str] = None,
+                 **kwargs) -> None:
         super().__init__(collect_device=collect_device, prefix=prefix)
+        self.extra_kwargs = kwargs
 
         self.ignore_index = ignore_index
         self.metrics = iou_metrics

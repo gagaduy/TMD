@@ -17,7 +17,30 @@ from mmengine.model import BaseModule
 from mmengine.model.weight_init import (constant_init, normal_init,
                                         trunc_normal_init)
 
-from natten import NeighborhoodAttention2D as NeighborhoodAttention
+try:
+    from natten import NeighborhoodAttention2D as _NeighborhoodAttention2D
+    import inspect
+    _sig = inspect.signature(_NeighborhoodAttention2D.__init__)
+    if 'dim' in _sig.parameters:
+        NeighborhoodAttention = _NeighborhoodAttention2D
+    else:
+        class NeighborhoodAttention(nn.Module):
+            def __init__(self, dim, kernel_size, dilation=1, num_heads=1, qkv_bias=True, qk_scale=None, attn_drop=0.0, proj_drop=0.0, **kwargs):
+                super().__init__()
+                dilation = dilation or 1
+                self.na = _NeighborhoodAttention2D(
+                    embed_dim=dim,
+                    num_heads=num_heads,
+                    kernel_size=kernel_size,
+                    dilation=dilation,
+                    qkv_bias=qkv_bias,
+                    qk_scale=qk_scale,
+                    proj_drop=proj_drop
+                )
+            def forward(self, x):
+                return self.na(x)
+except (ImportError, ModuleNotFoundError):
+    NeighborhoodAttention = None
 
 from mmseg.registry import MODELS
 
