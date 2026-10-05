@@ -2315,6 +2315,149 @@ class RandomCropWithExtra(BaseTransform):
 
 
 @TRANSFORMS.register_module()
+class FocusedCropWithExtra(BaseTransform):
+    """Focused / Positive-biased crop that prioritizes regions containing small
+    tampered text, with fallback to random crop.
+
+    Args:
+        crop_size (Union[int, Tuple[int, int]]): Expected size after cropping (h, w).
+        extra_keys (tuple): Extra keys to crop synchronously (e.g. 'dct', 'ela', 'ocr').
+        stride (int, optional): Grid alignment stride (e.g. 8 for DCT blocks).
+        pos_prob (float): Probability of sampling a crop containing positive (tampered) pixels.
+            Set to 0.0 for pure random crop (baseline), 0.7 for 70% positive focus, 1.0 for 100%.
+        cat_max_ratio (float): Max ratio single category can occupy (default 1.0).
+        ignore_index (int): Index to ignore in segmentation. Default: 255.
+    """
+
+    def __init__(self,
+                 crop_size: Union[int, Tuple[int, int]],
+                 extra_keys=(),
+                 stride=None,
+                 pos_prob: float = 0.7,
+                 cat_max_ratio: float = 1.,
+                 ignore_index: int = 255):
+        super().__init__()
+        assert isinstance(crop_size, int) or (
+            isinstance(crop_size, tuple) and len(crop_size) == 2
+        ), 'The expected crop_size is an integer, or a tuple containing two integers'
+
+        if isinstance(crop_size, int):
+            crop_size = (crop_size, crop_size)
+        assert crop_size[0] > 0 and crop_size[1] > 0
+        if stride is not None:
+            assert crop_size[0] % stride == 0 and crop_size[1] % stride == 0
+
+        self.crop_size = crop_size
+        self.extra_keys = (extra_keys, ) if isinstance(extra_keys, str) else extra_keys
+        self.stride = stride
+        self.pos_prob = pos_prob
+        self.cat_max_ratio = cat_max_ratio
+        self.ignore_index = ignore_index
+
+    def _generate_random_bbox(self, img_h: int, img_w: int) -> tuple:
+        margin_h = max(img_h - self.crop_size[0], 0)
+        margin_w = max(img_w - self.crop_size[1], 0)
+        offset_h = np.random.randint(0, margin_h + 1)
+        offset_w = np.random.randint(0, margin_w + 1)
+
+        if self.stride is not None:
+            offset_h = int(offset_h / self.stride) * self.stride
+            offset_w = int(offset_w / self.stride) * self.stride
+
+        crop_y1, crop_y2 = offset_h, offset_h + self.crop_size[0]
+        crop_x1, crop_x2 = offset_w, offset_w + self.crop_size[1]
+        return crop_y1, crop_y2, crop_x1, crop_x2
+
+    def _generate_focused_bbox(self, gt_seg_map: np.ndarray, img_h: int, img_w: int) -> tuple:
+        # Find positive (tampered) pixels (label == 1)
+        pos_coords = np.argwhere(gt_seg_map == 1)
+        if len(pos_coords) == 0:
+            return self._generate_random_bbox(img_h, img_w)
+
+        # Select a random tampered pixel as anchor
+        idx = np.random.randint(len(pos_coords))
+        center_y, center_x = pos_coords[idx]
+
+        # Valid top-left corner range such that (center_y, center_x) is inside the crop
+        min_offset_h = max(0, center_y - self.crop_size[0] + 1)
+        max_offset_h = min(img_h - self.crop_size[0], center_y)
+
+        min_offset_w = max(0, center_x - self.crop_size[1] + 1)
+        max_offset_w = min(img_w - self.crop_size[1], center_x)
+
+        if max_offset_h < min_offset_h:
+            offset_h = min_offset_h
+        else:
+            offset_h = np.random.randint(min_offset_h, max_offset_h + 1)
+
+        if max_offset_w < min_offset_w:
+            offset_w = min_offset_w
+        else:
+            offset_w = np.random.randint(min_offset_w, max_offset_w + 1)
+
+        # Align to stride if specified
+        if self.stride is not None:
+            offset_h = int(round(offset_h / self.stride)) * self.stride
+            offset_w = int(round(offset_w / self.stride)) * self.stride
+            # Ensure within bounds
+            offset_h = max(0, min(img_h - self.crop_size[0], offset_h))
+            offset_w = max(0, min(img_w - self.crop_size[1], offset_w))
+
+        crop_y1, crop_y2 = offset_h, offset_h + self.crop_size[0]
+        crop_x1, crop_x2 = offset_w, offset_w + self.crop_size[1]
+        return crop_y1, crop_y2, crop_x1, crop_x2
+
+    @cache_randomness
+    def crop_bbox(self, results: dict) -> tuple:
+        img = results['img']
+        img_h, img_w = img.shape[:2]
+
+        gt_seg = results.get('gt_seg_map', None)
+        has_pos = (gt_seg is not None) and (np.any(gt_seg == 1))
+
+        # Decide whether to focus on positive region
+        if has_pos and (np.random.rand() < self.pos_prob):
+            return self._generate_focused_bbox(gt_seg, img_h, img_w)
+        else:
+            return self._generate_random_bbox(img_h, img_w)
+
+    def crop(self, img: np.ndarray, crop_bbox: tuple) -> np.ndarray:
+        crop_y1, crop_y2, crop_x1, crop_x2 = crop_bbox
+        img = img[crop_y1:crop_y2, crop_x1:crop_x2, ...]
+        return img
+
+    def transform(self, results: dict) -> dict:
+        img = results['img']
+        crop_bbox = self.crop_bbox(results)
+
+        # crop the image
+        img = self.crop(img, crop_bbox)
+
+        # crop semantic seg
+        for key in results.get('seg_fields', []):
+            results[key] = self.crop(results[key], crop_bbox)
+
+        # crop extra fields
+        for key in self.extra_keys:
+            if results.get(key, None) is not None:
+                results[key] = self.crop(results[key], crop_bbox)
+
+        results['img'] = img
+        results['img_shape'] = img.shape[:2]
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(crop_size={self.crop_size},' \
+                    f'pos_prob={self.pos_prob}, ' \
+                    f'extra_keys={self.extra_keys}, ' \
+                    f'stride={self.stride}, ' \
+                    f'ignore_index={self.ignore_index})'
+        return repr_str
+
+
+
+@TRANSFORMS.register_module()
 class RandomCropWithDCT(BaseTransform):
     """Random crop the image & seg & block DCT.
     The crop stride is multiple to 8

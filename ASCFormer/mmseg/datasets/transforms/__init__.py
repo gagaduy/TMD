@@ -15,6 +15,7 @@ from .transforms import (CLAHE, AdjustGamma, BioMedical3DPad,
                          ResizeShortestEdge, ResizeToMultiple, RGB2Gray,
                          SegRescale,
                          RandomCropWithDCT, ResizeWithDCT, ResizeShortestEdgeWithDCT, RandomCropWithExtra,
+                         FocusedCropWithExtra,
                          RandomFlipWithDCT, PadWithDCT, ProcessDCT, DynamicResize,
                          ELA, SubtractData, AssignValue)
 
@@ -28,7 +29,7 @@ __all__ = [
     'LoadBiomedicalAnnotation', 'LoadBiomedicalData', 'GenerateEdge',
     'ResizeShortestEdge', 'BioMedicalGaussianNoise', 'BioMedicalGaussianBlur',
     'BioMedical3DRandomFlip', 'BioMedicalRandomGamma', 'BioMedical3DPad',
-    'RandomRotFlip', 'RandomCropWithExtra', 'RandomRotate90',
+    'RandomRotFlip', 'RandomCropWithExtra', 'FocusedCropWithExtra', 'RandomRotate90',
     'PackSegInputsWithExtra',
     'LoadDCTFromJPEGIO',
     'LoadOCRSpatialFromFile',
