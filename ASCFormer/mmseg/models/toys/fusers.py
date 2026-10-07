@@ -31,12 +31,33 @@ except (ImportError, ModuleNotFoundError):
     try:
         from natten.functional import na2d
     except (ImportError, ModuleNotFoundError):
-        na2d = None
+        def na2d(q, k, v, kernel_size=5, dilation=1):
+            B, H, W, num_heads, head_dim = q.shape
+            dilation = dilation or 1
+            padding = (kernel_size // 2) * dilation
+
+            q_p = q.permute(0, 3, 4, 1, 2)
+            k_p = k.permute(0, 3, 4, 1, 2).reshape(B * num_heads, head_dim, H, W)
+            v_p = v.permute(0, 3, 4, 1, 2).reshape(B * num_heads, head_dim, H, W)
+
+            k_unfold = F.unfold(k_p, kernel_size=kernel_size, dilation=dilation, padding=padding)
+            k_unfold = k_unfold.view(B, num_heads, head_dim, kernel_size * kernel_size, H, W)
+
+            v_unfold = F.unfold(v_p, kernel_size=kernel_size, dilation=dilation, padding=padding)
+            v_unfold = v_unfold.view(B, num_heads, head_dim, kernel_size * kernel_size, H, W)
+
+            scale = head_dim ** -0.5
+            q_u = q_p.unsqueeze(3)
+            attn = (q_u * k_unfold).sum(dim=2) * scale
+            attn = F.softmax(attn, dim=2)
+
+            out = (attn.unsqueeze(2) * v_unfold).sum(dim=3)
+            return out.permute(0, 3, 4, 1, 2).contiguous()
 
 try:
     from natten import NeighborhoodAttention2D as NeighborhoodAttention
 except (ImportError, ModuleNotFoundError):
-    NeighborhoodAttention = None
+    from ..backbones.nat import NeighborhoodAttention
 from timm.models.layers import DropPath
 
 class NATFusionModule(nn.Module):

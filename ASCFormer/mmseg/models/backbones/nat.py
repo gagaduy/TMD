@@ -40,7 +40,45 @@ try:
             def forward(self, x):
                 return self.na(x)
 except (ImportError, ModuleNotFoundError):
-    NeighborhoodAttention = None
+    import torch.nn.functional as F
+    class NeighborhoodAttention(nn.Module):
+        def __init__(self, dim, kernel_size=5, dilation=1, num_heads=1, qkv_bias=True, qk_scale=None, attn_drop=0.0, proj_drop=0.0, **kwargs):
+            super().__init__()
+            self.dim = dim
+            self.num_heads = num_heads
+            self.head_dim = dim // num_heads
+            self.scale = qk_scale or self.head_dim ** -0.5
+            self.kernel_size = kernel_size
+            self.dilation = dilation or 1
+            self.padding = (kernel_size // 2) * self.dilation
+
+            self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+            self.attn_drop = nn.Dropout(attn_drop)
+            self.proj = nn.Linear(dim, dim)
+            self.proj_drop = nn.Dropout(proj_drop)
+
+        def forward(self, x):
+            B, H, W, C = x.shape
+            qkv = self.qkv(x).reshape(B, H, W, 3, self.num_heads, self.head_dim).permute(3, 0, 4, 5, 1, 2)
+            q, k, v = qkv[0], qkv[1], qkv[2]
+
+            k_flat = k.reshape(B * self.num_heads, self.head_dim, H, W)
+            v_flat = v.reshape(B * self.num_heads, self.head_dim, H, W)
+
+            k_unfold = F.unfold(k_flat, kernel_size=self.kernel_size, dilation=self.dilation, padding=self.padding)
+            k_unfold = k_unfold.view(B, self.num_heads, self.head_dim, self.kernel_size * self.kernel_size, H, W)
+
+            v_unfold = F.unfold(v_flat, kernel_size=self.kernel_size, dilation=self.dilation, padding=self.padding)
+            v_unfold = v_unfold.view(B, self.num_heads, self.head_dim, self.kernel_size * self.kernel_size, H, W)
+
+            q_u = q.unsqueeze(3)
+            attn = (q_u * k_unfold).sum(dim=2) * self.scale
+            attn = F.softmax(attn, dim=2)
+            attn = self.attn_drop(attn)
+
+            out = (attn.unsqueeze(2) * v_unfold).sum(dim=3)
+            out = out.permute(0, 3, 4, 1, 2).reshape(B, H, W, C)
+            return self.proj_drop(self.proj(out))
 
 from mmseg.registry import MODELS
 
