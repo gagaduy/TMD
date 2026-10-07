@@ -58,6 +58,21 @@ val_evaluator = dict(
     save_confusion_matrix=True
 )
 
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=8,
+    persistent_workers=True,
+    dataset=dict(ann_file='val.txt')
+)
+
+test_evaluator = dict(
+    type='BinaryIoUMetric',
+    iou_metrics=['mIoU', 'mDice', 'mFscore'],
+    threshold=0.25,
+    output_dir='work_dirs/a100_80gb_tristream_proto/test_metrics',
+    save_confusion_matrix=True
+)
+
 # Use LocalVisBackend only (prevents TensorFlow/JAX/NumPy conflict on Colab)
 vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(

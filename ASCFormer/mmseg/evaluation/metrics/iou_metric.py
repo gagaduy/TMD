@@ -342,7 +342,16 @@ class BinaryIoUMetric(BaseMetric):
         """
         num_classes = len(self.dataset_meta['classes'])
         for data_sample in data_samples:
-            pred_label = data_sample['pred_sem_seg']['data'].squeeze()
+            if self.threshold != 0.5 and 'seg_logits' in data_sample:
+                seg_logits = data_sample['seg_logits']['data']
+                if seg_logits.shape[0] == 2:
+                    prob = torch.softmax(seg_logits.float(), dim=0)[1]
+                    pred_label = (prob > self.threshold).to(torch.long).squeeze()
+                else:
+                    prob = torch.sigmoid(seg_logits.float()).squeeze()
+                    pred_label = (prob > self.threshold).to(torch.long)
+            else:
+                pred_label = data_sample['pred_sem_seg']['data'].squeeze()
             label = data_sample['gt_sem_seg']['data'].squeeze().to(pred_label)
             self.results.append(
                 self.intersect_and_union(pred_label, label, num_classes,
@@ -453,7 +462,7 @@ class BinaryIoUMetric(BaseMetric):
         for key, val in ret_metrics_class.items():
             class_table_data.add_column(key, val)
 
-        print_log('per class results:', logger)
+        print_log(f'per class results (decision threshold={self.threshold}):', logger)
         print_log('\n' + class_table_data.get_string(), logger=logger)
 
         return metrics
