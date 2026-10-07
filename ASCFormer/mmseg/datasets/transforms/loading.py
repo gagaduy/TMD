@@ -12,7 +12,10 @@ from mmcv.transforms import LoadImageFromFile
 from mmseg.registry import TRANSFORMS
 from mmseg.utils import datafrombytes
 
-import jpegio
+try:
+    import jpegio
+except ImportError:
+    jpegio = None
 import os.path as osp
 import cv2
 
