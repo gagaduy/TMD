@@ -57,3 +57,12 @@ val_evaluator = dict(
     output_dir='work_dirs/a100_80gb_tristream_proto/val_metrics',
     save_confusion_matrix=True
 )
+
+# Use LocalVisBackend only (prevents TensorFlow/JAX/NumPy conflict on Colab)
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='SegLocalVisualizer',
+    vis_backends=vis_backends,
+    name='visualizer'
+)
+

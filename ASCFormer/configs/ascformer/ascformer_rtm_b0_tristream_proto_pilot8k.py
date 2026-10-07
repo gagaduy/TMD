@@ -28,4 +28,13 @@ model = dict(
 val_evaluator = dict(
     iou_metrics=['mIoU', 'mDice', 'mFscore'],
     output_dir='work_dirs/pilot8k_b0_tristream_proto/val_metrics',
-    save_confusion_matrix=True)
+    save_confusion_matrix=True
+)
+
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='SegLocalVisualizer',
+    vis_backends=vis_backends,
+    name='visualizer'
+)
+

@@ -47,3 +47,11 @@ val_evaluator = dict(
     output_dir='work_dirs/a100_b0_tristream_proto/val_metrics',
     save_confusion_matrix=True
 )
+
+vis_backends = [dict(type='LocalVisBackend')]
+visualizer = dict(
+    type='SegLocalVisualizer',
+    vis_backends=vis_backends,
+    name='visualizer'
+)
+
