@@ -3,9 +3,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mmcv.cnn import build_conv_layer, build_norm_layer
-from lightly import loss as loss_contrastive
-# from lightly.models.modules import heads
+try:
+    from lightly import loss as loss_contrastive
+except ImportError:
+    loss_contrastive = None
 
 from mmcv.cnn import ConvModule
 
