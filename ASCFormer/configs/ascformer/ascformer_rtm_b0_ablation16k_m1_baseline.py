@@ -22,7 +22,7 @@ train_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=2,
     num_workers=3,
     persistent_workers=True,
     pin_memory=True,
