@@ -31,28 +31,44 @@ except (ImportError, ModuleNotFoundError):
     try:
         from natten.functional import na2d
     except (ImportError, ModuleNotFoundError):
+        def _fast_na2d_shift(q, k, v, scale: float, kernel_size: int = 5, dilation: int = 1):
+            B, H, W, nh, hd = q.shape
+            d = dilation or 1
+            pad = (kernel_size // 2) * d
+            q_s = q * scale
+            k_pad = F.pad(k, (0, 0, 0, 0, pad, pad, pad, pad))
+            v_pad = F.pad(v, (0, 0, 0, 0, pad, pad, pad, pad))
+            logits = []
+            for dy in range(kernel_size):
+                y0 = dy * d
+                for dx in range(kernel_size):
+                    x0 = dx * d
+                    k_slice = k_pad[:, y0:y0 + H, x0:x0 + W]
+                    logits.append((q_s * k_slice).sum(dim=-1))
+            attn = torch.stack(logits, dim=-1).softmax(dim=-1)
+            out = torch.zeros_like(q)
+            idx = 0
+            for dy in range(kernel_size):
+                y0 = dy * d
+                for dx in range(kernel_size):
+                    x0 = dx * d
+                    v_slice = v_pad[:, y0:y0 + H, x0:x0 + W]
+                    out = out + attn[..., idx:idx + 1] * v_slice
+                    idx += 1
+            return out
+
+        try:
+            _compiled_na2d_shift = torch.compile(_fast_na2d_shift)
+        except Exception:
+            _compiled_na2d_shift = _fast_na2d_shift
+
         def na2d(q, k, v, kernel_size=5, dilation=1):
-            B, H, W, num_heads, head_dim = q.shape
-            dilation = dilation or 1
-            padding = (kernel_size // 2) * dilation
-
-            q_p = q.permute(0, 3, 4, 1, 2)
-            k_p = k.permute(0, 3, 4, 1, 2).reshape(B * num_heads, head_dim, H, W)
-            v_p = v.permute(0, 3, 4, 1, 2).reshape(B * num_heads, head_dim, H, W)
-
-            k_unfold = F.unfold(k_p, kernel_size=kernel_size, dilation=dilation, padding=padding)
-            k_unfold = k_unfold.view(B, num_heads, head_dim, kernel_size * kernel_size, H, W)
-
-            v_unfold = F.unfold(v_p, kernel_size=kernel_size, dilation=dilation, padding=padding)
-            v_unfold = v_unfold.view(B, num_heads, head_dim, kernel_size * kernel_size, H, W)
-
-            scale = head_dim ** -0.5
-            q_u = q_p.unsqueeze(3)
-            attn = (q_u * k_unfold).sum(dim=2) * scale
-            attn = F.softmax(attn, dim=2)
-
-            out = (attn.unsqueeze(2) * v_unfold).sum(dim=3)
-            return out.permute(0, 3, 4, 1, 2).contiguous()
+            scale = float(q.shape[-1] ** -0.5)
+            d = int(dilation or 1)
+            ks = int(kernel_size)
+            if q.is_cuda:
+                return _compiled_na2d_shift(q, k, v, scale, ks, d)
+            return _fast_na2d_shift(q, k, v, scale, ks, d)
 
 try:
     from natten import NeighborhoodAttention2D as NeighborhoodAttention

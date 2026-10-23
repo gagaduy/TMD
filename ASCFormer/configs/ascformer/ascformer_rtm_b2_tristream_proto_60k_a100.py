@@ -247,8 +247,8 @@ optim_wrapper = dict(
     )
 )
 
-# 60,000 iterations x batch_size 8 = 480,000 crops (exact match to 80,000 x 6 in original paper)
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=60000, val_interval=10000)
+# 30,000 iterations x batch_size 8 = 240,000 focused crops (~41.4 epochs, >168k positive tampered crops)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=30000, val_interval=10000)
 
 param_scheduler = [
     dict(type='LinearLR', start_factor=1e-6, by_epoch=False, begin=0, end=1000),
@@ -257,7 +257,7 @@ param_scheduler = [
         eta_min=0.0,
         power=1.0,
         begin=1000,
-        end=60000,
+        end=30000,
         by_epoch=False,
     )
 ]

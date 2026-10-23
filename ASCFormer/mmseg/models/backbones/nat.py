@@ -41,16 +41,50 @@ try:
                 return self.na(x)
 except (ImportError, ModuleNotFoundError):
     import torch.nn.functional as F
+
+    def _fast_nat_self_shift(qkv, scale: float, kernel_size: int = 5, dilation: int = 1):
+        # qkv: (3, B, H, W, nh, hd)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+        B, H, W, nh, hd = q.shape
+        d = dilation or 1
+        pad = (kernel_size // 2) * d
+        q_s = q * scale
+        k_pad = F.pad(k, (0, 0, 0, 0, pad, pad, pad, pad))
+        v_pad = F.pad(v, (0, 0, 0, 0, pad, pad, pad, pad))
+        logits = []
+        for dy in range(kernel_size):
+            y0 = dy * d
+            for dx in range(kernel_size):
+                x0 = dx * d
+                k_slice = k_pad[:, y0:y0 + H, x0:x0 + W]
+                logits.append((q_s * k_slice).sum(dim=-1))
+        attn = torch.stack(logits, dim=-1).softmax(dim=-1)
+        out = torch.zeros_like(q)
+        idx = 0
+        for dy in range(kernel_size):
+            y0 = dy * d
+            for dx in range(kernel_size):
+                x0 = dx * d
+                v_slice = v_pad[:, y0:y0 + H, x0:x0 + W]
+                out = out + attn[..., idx:idx + 1] * v_slice
+                idx += 1
+        return out
+
+    try:
+        _compiled_nat_self_shift = torch.compile(_fast_nat_self_shift)
+    except Exception:
+        _compiled_nat_self_shift = _fast_nat_self_shift
+
     class NeighborhoodAttention(nn.Module):
         def __init__(self, dim, kernel_size=5, dilation=1, num_heads=1, qkv_bias=True, qk_scale=None, attn_drop=0.0, proj_drop=0.0, **kwargs):
             super().__init__()
             self.dim = dim
             self.num_heads = num_heads
             self.head_dim = dim // num_heads
-            self.scale = qk_scale or self.head_dim ** -0.5
-            self.kernel_size = kernel_size
-            self.dilation = dilation or 1
-            self.padding = (kernel_size // 2) * self.dilation
+            self.scale = float(qk_scale or self.head_dim ** -0.5)
+            self.kernel_size = int(kernel_size)
+            self.dilation = int(dilation or 1)
+            self.padding = (self.kernel_size // 2) * self.dilation
 
             self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
             self.attn_drop = nn.Dropout(attn_drop)
@@ -59,25 +93,12 @@ except (ImportError, ModuleNotFoundError):
 
         def forward(self, x):
             B, H, W, C = x.shape
-            qkv = self.qkv(x).reshape(B, H, W, 3, self.num_heads, self.head_dim).permute(3, 0, 4, 5, 1, 2)
-            q, k, v = qkv[0], qkv[1], qkv[2]
-
-            k_flat = k.reshape(B * self.num_heads, self.head_dim, H, W)
-            v_flat = v.reshape(B * self.num_heads, self.head_dim, H, W)
-
-            k_unfold = F.unfold(k_flat, kernel_size=self.kernel_size, dilation=self.dilation, padding=self.padding)
-            k_unfold = k_unfold.view(B, self.num_heads, self.head_dim, self.kernel_size * self.kernel_size, H, W)
-
-            v_unfold = F.unfold(v_flat, kernel_size=self.kernel_size, dilation=self.dilation, padding=self.padding)
-            v_unfold = v_unfold.view(B, self.num_heads, self.head_dim, self.kernel_size * self.kernel_size, H, W)
-
-            q_u = q.unsqueeze(3)
-            attn = (q_u * k_unfold).sum(dim=2) * self.scale
-            attn = F.softmax(attn, dim=2)
-            attn = self.attn_drop(attn)
-
-            out = (attn.unsqueeze(2) * v_unfold).sum(dim=3)
-            out = out.permute(0, 3, 4, 1, 2).reshape(B, H, W, C)
+            qkv = self.qkv(x).reshape(B, H, W, 3, self.num_heads, self.head_dim).permute(3, 0, 1, 2, 4, 5)
+            if x.is_cuda:
+                out = _compiled_nat_self_shift(qkv, self.scale, self.kernel_size, self.dilation)
+            else:
+                out = _fast_nat_self_shift(qkv, self.scale, self.kernel_size, self.dilation)
+            out = out.reshape(B, H, W, C)
             return self.proj_drop(self.proj(out))
 
 from mmseg.registry import MODELS
