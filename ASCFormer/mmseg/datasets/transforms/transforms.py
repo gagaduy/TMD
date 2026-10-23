@@ -3507,6 +3507,15 @@ class BlockDCT(BaseTransform):
         dct_encode_idx = self.dct_idxs.transpose(1, 0)
         self.zigzag_encode_idx = (dct_encode_idx[0], dct_encode_idx[1])
 
+        # Precompute 1D orthonormal DCT matrix for fast vectorized 2D block DCT
+        k = np.arange(block_size)[:, None]
+        n = np.arange(block_size)[None, :]
+        dct_mat = np.cos(np.pi * (2 * n + 1) * k / (2.0 * block_size)).astype(np.float32)
+        dct_mat[0, :] *= np.sqrt(1.0 / block_size)
+        dct_mat[1:, :] *= np.sqrt(2.0 / block_size)
+        self.dct_mat = dct_mat
+        self.dct_mat_T = dct_mat.T
+
         self.c_table = {'Y': 0, 'U': 1, 'V': 2}
         self.idx_c = self.c_table[channel]
 
@@ -3540,17 +3549,11 @@ class BlockDCT(BaseTransform):
         if self.shift:
             img_Y = img_Y - 128
 
-        # apply block dct
-        dct = []
-
-        for i in range(img_Y.shape[0]):
-            dct_block = self._block_dct(img_Y[i])
-            if self.zigzag:
-                dct_block =  dct_block[self.zigzag_encode_idx]
-            dct.append(dct_block)
-
-        # reshape back
-        dct = np.array(dct)
+        # Vectorized 2D Block DCT across all blocks simultaneously
+        dct = self.dct_mat @ img_Y @ self.dct_mat_T
+        if self.zigzag:
+            dct = dct[:, self.zigzag_encode_idx[0], self.zigzag_encode_idx[1]].reshape(
+                -1, self.block_size, self.block_size)
 
         dct = dct.reshape(H // self.block_size, W // self.block_size, self.block_size, self.block_size).transpose(0, 2, 1, 3)
         dct = dct.reshape(H, W)

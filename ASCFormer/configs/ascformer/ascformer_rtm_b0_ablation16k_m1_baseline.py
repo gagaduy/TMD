@@ -1,23 +1,42 @@
-"""Ablation 16k - M1: Baseline 2-Stream (RGB + Forensic Hub) MiT-B0 on A100."""
+"""Ablation 16k - M1: Baseline 2-Stream (RGB + Forensic Hub) MiT-B0 on A100 (Parallel Mode)."""
 _base_ = ['./ascformer_rtm_b0.py']
 
 randomness = dict(seed=3407)
+crop_size = (512, 512)
+quality = 80
+
+# Crop 512x512 at stride=8 (8x8 JPEG block aligned) BEFORE ELA & BlockDCT -> 15x faster CPU pipeline!
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', binary=True),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(type='RandomCropWithExtra',
+         crop_size=crop_size,
+         stride=8,
+         extra_keys=(),
+         cat_max_ratio=0.75),
+    dict(type='ELA', quality=quality),
+    dict(type='BlockDCT', zigzag=True),
+    dict(type='PackSegInputsWithExtra', extra_keys=('dct', 'ela'))
+]
 
 train_dataloader = dict(
     batch_size=4,
-    num_workers=8,
+    num_workers=3,
     persistent_workers=True,
-    pin_memory=True
+    pin_memory=True,
+    dataset=dict(pipeline=train_pipeline)
 )
 val_dataloader = dict(
     batch_size=1,
-    num_workers=8,
+    num_workers=3,
     persistent_workers=True,
     pin_memory=True
 )
 test_dataloader = dict(
     batch_size=1,
-    num_workers=8,
+    num_workers=3,
     persistent_workers=True,
     pin_memory=True
 )
