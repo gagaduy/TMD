@@ -2397,11 +2397,13 @@ class FocusedCropWithExtra(BaseTransform):
 
         # Align to stride if specified
         if self.stride is not None:
+            max_valid_h = max(0, ((img_h - self.crop_size[0]) // self.stride) * self.stride)
+            max_valid_w = max(0, ((img_w - self.crop_size[1]) // self.stride) * self.stride)
             offset_h = int(round(offset_h / self.stride)) * self.stride
             offset_w = int(round(offset_w / self.stride)) * self.stride
-            # Ensure within bounds
-            offset_h = max(0, min(img_h - self.crop_size[0], offset_h))
-            offset_w = max(0, min(img_w - self.crop_size[1], offset_w))
+            # Ensure within bounds while strictly preserving stride alignment
+            offset_h = max(0, min(max_valid_h, offset_h))
+            offset_w = max(0, min(max_valid_w, offset_w))
 
         crop_y1, crop_y2 = offset_h, offset_h + self.crop_size[0]
         crop_x1, crop_x2 = offset_w, offset_w + self.crop_size[1]
