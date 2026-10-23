@@ -54,6 +54,11 @@ def parse_args():
         type=str,
         default=None,
         help='Directory to save sweep results JSON')
+    parser.add_argument(
+        '--out-json',
+        type=str,
+        default=None,
+        help='Path to save sweep results JSON file')
     return parser.parse_args()
 
 
@@ -73,8 +78,9 @@ def main():
     cfg.test_dataloader.dataset.ann_file = args.ann_file
     cfg.test_dataloader.batch_size = args.batch_size
 
-    # Build runner
+    # Build runner and load checkpoint weights
     runner = Runner.from_cfg(cfg)
+    runner.load_or_resume()
     model = runner.model
     model.eval()
 
@@ -95,6 +101,11 @@ def main():
     print('=' * 85)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    t_tensor = torch.tensor(thresholds, device=device, dtype=torch.float32).view(-1, 1, 1)
+    tp_acc = torch.zeros(len(thresholds), device=device, dtype=torch.int64)
+    fp_acc = torch.zeros(len(thresholds), device=device, dtype=torch.int64)
+    fn_acc = torch.zeros(len(thresholds), device=device, dtype=torch.int64)
+    tn_acc = torch.zeros(len(thresholds), device=device, dtype=torch.int64)
     count = 0
 
     with torch.no_grad():
@@ -108,7 +119,7 @@ def main():
             for output in outputs:
                 count += 1
                 gt_data = output.gt_sem_seg.data.squeeze().to(device)
-                ignore_mask = (gt_data == 255)
+                valid_mask = (gt_data != 255)
 
                 # Get predicted logits
                 seg_logits = output.seg_logits.data.to(device)
@@ -118,25 +129,30 @@ def main():
                 else:
                     prob_tamp = torch.sigmoid(seg_logits.float()).squeeze()
 
-                gt_bin = (gt_data == 1) & (~ignore_mask)
-                gt_auth = (gt_data == 0) & (~ignore_mask)
+                gt_bin = (gt_data == 1) & valid_mask
+                gt_auth = (gt_data == 0) & valid_mask
 
-                # Vectorized confusion update for all thresholds
-                for t in thresholds:
-                    pred_tamp = (prob_tamp > t) & (~ignore_mask)
+                # Fully vectorized on GPU across all thresholds simultaneously: (T, H, W)
+                pred_tamp = (prob_tamp.unsqueeze(0) > t_tensor) & valid_mask.unsqueeze(0)
+                not_pred_tamp = (~pred_tamp) & valid_mask.unsqueeze(0)
 
-                    tp = (pred_tamp & gt_bin).sum().item()
-                    fp = (pred_tamp & gt_auth).sum().item()
-                    fn = ((~pred_tamp) & gt_bin).sum().item()
-                    tn = ((~pred_tamp) & gt_auth).sum().item()
+                tp_acc += (pred_tamp & gt_bin.unsqueeze(0)).sum(dim=(1, 2))
+                fp_acc += (pred_tamp & gt_auth.unsqueeze(0)).sum(dim=(1, 2))
+                fn_acc += (not_pred_tamp & gt_bin.unsqueeze(0)).sum(dim=(1, 2))
+                tn_acc += (not_pred_tamp & gt_auth.unsqueeze(0)).sum(dim=(1, 2))
 
-                    confusion[t]['TP'] += tp
-                    confusion[t]['FP'] += fp
-                    confusion[t]['FN'] += fn
-                    confusion[t]['TN'] += tn
+            if (i + 1) % 100 == 0 or (i + 1) == eval_samples:
+                print(f'   Đang xử lý: [{count}/{eval_samples}] ảnh...', flush=True)
 
-            if (i + 1) % 50 == 0 or (i + 1) == eval_samples:
-                print(f'   Đang xử lý: [{count}/{eval_samples}] ảnh...')
+    tp_list = tp_acc.cpu().tolist()
+    fp_list = fp_acc.cpu().tolist()
+    fn_list = fn_acc.cpu().tolist()
+    tn_list = tn_acc.cpu().tolist()
+    for idx, t in enumerate(thresholds):
+        confusion[t]['TP'] = tp_list[idx]
+        confusion[t]['FP'] = fp_list[idx]
+        confusion[t]['FN'] = fn_list[idx]
+        confusion[t]['TN'] = tn_list[idx]
 
     # Compile table
     table = PrettyTable()
@@ -177,7 +193,7 @@ def main():
             best_tau = t
 
         row = [
-            f'{t:.2f}',
+            f'{t:.3f}',
             f'{t_iou:.2f}%',
             f'{t_prec:.2f}%',
             f'{t_rec:.2f}%',
@@ -200,8 +216,21 @@ def main():
     print('📊 BẢNG KẾT QUẢ QUÉT NGƯỠNG TOÀN DIỆN (THRESHOLD SWEEP)')
     print('=' * 85)
     print(table)
-    print(f'\n⭐ NGƯỠNG ĐẠT ĐỈNH (PEAK): tau = {best_tau:.2f} với Tampered IoU = {best_iou:.2f}%')
+    print(f'\n⭐ NGƯỠNG ĐẠT ĐỈNH (PEAK): tau = {best_tau:.3f} với Tampered IoU = {best_iou:.2f}%')
     print('=' * 85)
+
+    if args.out_json:
+        import json
+        os.makedirs(os.path.dirname(os.path.abspath(args.out_json)), exist_ok=True)
+        with open(args.out_json, 'w') as f:
+            json.dump({
+                'config': args.config,
+                'checkpoint': args.checkpoint,
+                'best_tau': best_tau,
+                'best_iou': round(best_iou, 4),
+                'results': results_summary
+            }, f, indent=2)
+        print(f'💾 Đã lưu kết quả JSON vào: {args.out_json}')
 
 
 if __name__ == '__main__':
