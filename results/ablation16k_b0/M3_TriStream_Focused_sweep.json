@@ -1,0 +1,176 @@
+{
+  "model": "M3_TriStream_Focused",
+  "results": [
+    {
+      "threshold": 0.02,
+      "tampered_iou": 1.73,
+      "tampered_precision": 1.74,
+      "tampered_recall": 71.59,
+      "tampered_dice": 3.4,
+      "background_iou": 53.56,
+      "m_iou": 27.64
+    },
+    {
+      "threshold": 0.025,
+      "tampered_iou": 1.93,
+      "tampered_precision": 1.96,
+      "tampered_recall": 60.28,
+      "tampered_dice": 3.79,
+      "background_iou": 65.2,
+      "m_iou": 33.57
+    },
+    {
+      "threshold": 0.03,
+      "tampered_iou": 2.1,
+      "tampered_precision": 2.15,
+      "tampered_recall": 49.1,
+      "tampered_dice": 4.12,
+      "background_iou": 74.0,
+      "m_iou": 38.05
+    },
+    {
+      "threshold": 0.035,
+      "tampered_iou": 2.23,
+      "tampered_precision": 2.31,
+      "tampered_recall": 39.78,
+      "tampered_dice": 4.37,
+      "background_iou": 80.22,
+      "m_iou": 41.22
+    },
+    {
+      "threshold": 0.04,
+      "tampered_iou": 2.37,
+      "tampered_precision": 2.48,
+      "tampered_recall": 33.49,
+      "tampered_dice": 4.62,
+      "background_iou": 84.32,
+      "m_iou": 43.34
+    },
+    {
+      "threshold": 0.045,
+      "tampered_iou": 2.49,
+      "tampered_precision": 2.66,
+      "tampered_recall": 28.92,
+      "tampered_dice": 4.87,
+      "background_iou": 87.17,
+      "m_iou": 44.83
+    },
+    {
+      "threshold": 0.05,
+      "tampered_iou": 2.65,
+      "tampered_precision": 2.87,
+      "tampered_recall": 25.24,
+      "tampered_dice": 5.16,
+      "background_iou": 89.46,
+      "m_iou": 46.05
+    },
+    {
+      "threshold": 0.06,
+      "tampered_iou": 3.05,
+      "tampered_precision": 3.47,
+      "tampered_recall": 20.03,
+      "tampered_dice": 5.92,
+      "background_iou": 92.79,
+      "m_iou": 47.92
+    },
+    {
+      "threshold": 0.08,
+      "tampered_iou": 4.17,
+      "tampered_precision": 5.52,
+      "tampered_recall": 14.58,
+      "tampered_dice": 8.01,
+      "background_iou": 96.21,
+      "m_iou": 50.19
+    },
+    {
+      "threshold": 0.1,
+      "tampered_iou": 4.3,
+      "tampered_precision": 6.37,
+      "tampered_recall": 11.72,
+      "tampered_dice": 8.25,
+      "background_iou": 97.05,
+      "m_iou": 50.68
+    },
+    {
+      "threshold": 0.12,
+      "tampered_iou": 4.24,
+      "tampered_precision": 7.02,
+      "tampered_recall": 9.68,
+      "tampered_dice": 8.14,
+      "background_iou": 97.52,
+      "m_iou": 50.88
+    },
+    {
+      "threshold": 0.15,
+      "tampered_iou": 4.02,
+      "tampered_precision": 7.98,
+      "tampered_recall": 7.48,
+      "tampered_dice": 7.72,
+      "background_iou": 97.98,
+      "m_iou": 51.0
+    },
+    {
+      "threshold": 0.2,
+      "tampered_iou": 3.47,
+      "tampered_precision": 9.93,
+      "tampered_recall": 5.06,
+      "tampered_dice": 6.7,
+      "background_iou": 98.41,
+      "m_iou": 50.94
+    },
+    {
+      "threshold": 0.25,
+      "tampered_iou": 2.64,
+      "tampered_precision": 12.2,
+      "tampered_recall": 3.27,
+      "tampered_dice": 5.15,
+      "background_iou": 98.64,
+      "m_iou": 50.64
+    },
+    {
+      "threshold": 0.3,
+      "tampered_iou": 1.59,
+      "tampered_precision": 15.69,
+      "tampered_recall": 1.73,
+      "tampered_dice": 3.12,
+      "background_iou": 98.78,
+      "m_iou": 50.18
+    },
+    {
+      "threshold": 0.35,
+      "tampered_iou": 0.66,
+      "tampered_precision": 24.18,
+      "tampered_recall": 0.68,
+      "tampered_dice": 1.32,
+      "background_iou": 98.85,
+      "m_iou": 49.76
+    },
+    {
+      "threshold": 0.4,
+      "tampered_iou": 0.08,
+      "tampered_precision": 29.78,
+      "tampered_recall": 0.08,
+      "tampered_dice": 0.16,
+      "background_iou": 98.87,
+      "m_iou": 49.48
+    },
+    {
+      "threshold": 0.45,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "background_iou": 98.87,
+      "m_iou": 49.43
+    },
+    {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "background_iou": 98.87,
+      "m_iou": 49.43
+    }
+  ]
+}
