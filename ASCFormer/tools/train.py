@@ -56,6 +56,16 @@ def parse_args():
 def main():
     args = parse_args()
 
+    import torch
+    if torch.cuda.is_available():
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        torch.backends.cudnn.benchmark = True
+        try:
+            torch.set_float32_matmul_precision('high')
+        except Exception:
+            pass
+
     register_all_modules(init_default_scope=False)
 
     # load config

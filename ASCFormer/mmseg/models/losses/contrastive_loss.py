@@ -46,8 +46,9 @@ class SupConLoss(nn.Module):
         """
 
         device = features.device
-        current_rank = torch.distributed.get_rank()
-        if self.gather:
+        is_dist = torch.distributed.is_available() and torch.distributed.is_initialized()
+        current_rank = torch.distributed.get_rank() if is_dist else 0
+        if self.gather and is_dist:
             assert mask is None
 
             all_features = get_all_gather_with_various_shape(features)

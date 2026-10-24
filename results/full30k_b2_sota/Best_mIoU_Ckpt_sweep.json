@@ -1,0 +1,165 @@
+{
+  "model": "Full_SOTA_MiT_B2_TriStream_Focused_Proto_30k_Batch8",
+  "config": "configs/ascformer/ascformer_rtm_b2_tristream_proto_60k_a100.py",
+  "checkpoint": "best_mIoU_iter_30000.pth",
+  "val_progression_tau050": [
+    {
+      "iter": 10000,
+      "mIoU": 55.9,
+      "mDice": 61.21,
+      "mPrecision": 69.52,
+      "mRecall": 57.95
+    },
+    {
+      "iter": 20000,
+      "mIoU": 57.46,
+      "mDice": 63.54,
+      "mPrecision": 75.81,
+      "mRecall": 59.27
+    },
+    {
+      "iter": 30000,
+      "mIoU": 59.0,
+      "mDice": 65.78,
+      "mPrecision": 74.7,
+      "mRecall": 61.67
+    }
+  ],
+  "results": [
+    {
+      "threshold": 0.05,
+      "tampered_iou": 6.34,
+      "tampered_precision": 6.72,
+      "tampered_recall": 52.52,
+      "tampered_dice": 11.92,
+      "background_iou": 91.17,
+      "m_iou": 48.75
+    },
+    {
+      "threshold": 0.08,
+      "tampered_iou": 10.18,
+      "tampered_precision": 11.58,
+      "tampered_recall": 45.65,
+      "tampered_dice": 18.48,
+      "background_iou": 95.42,
+      "m_iou": 52.8
+    },
+    {
+      "threshold": 0.1,
+      "tampered_iou": 12.63,
+      "tampered_precision": 15.22,
+      "tampered_recall": 42.56,
+      "tampered_dice": 22.42,
+      "background_iou": 96.65,
+      "m_iou": 54.64
+    },
+    {
+      "threshold": 0.12,
+      "tampered_iou": 14.56,
+      "tampered_precision": 18.66,
+      "tampered_recall": 39.89,
+      "tampered_dice": 25.42,
+      "background_iou": 97.34,
+      "m_iou": 55.95
+    },
+    {
+      "threshold": 0.15,
+      "tampered_iou": 16.18,
+      "tampered_precision": 22.16,
+      "tampered_recall": 37.5,
+      "tampered_dice": 27.86,
+      "background_iou": 97.79,
+      "m_iou": 56.99
+    },
+    {
+      "threshold": 0.18,
+      "tampered_iou": 17.25,
+      "tampered_precision": 25.1,
+      "tampered_recall": 35.53,
+      "tampered_dice": 29.42,
+      "background_iou": 98.06,
+      "m_iou": 57.66
+    },
+    {
+      "threshold": 0.2,
+      "tampered_iou": 17.82,
+      "tampered_precision": 26.97,
+      "tampered_recall": 34.44,
+      "tampered_dice": 30.25,
+      "background_iou": 98.2,
+      "m_iou": 58.01
+    },
+    {
+      "threshold": 0.25,
+      "tampered_iou": 18.96,
+      "tampered_precision": 31.58,
+      "tampered_recall": 32.18,
+      "tampered_dice": 31.87,
+      "background_iou": 98.44,
+      "m_iou": 58.7
+    },
+    {
+      "threshold": 0.3,
+      "tampered_iou": 19.65,
+      "tampered_precision": 35.9,
+      "tampered_recall": 30.26,
+      "tampered_dice": 32.84,
+      "background_iou": 98.6,
+      "m_iou": 59.12
+    },
+    {
+      "threshold": 0.35,
+      "tampered_iou": 19.91,
+      "tampered_precision": 39.85,
+      "tampered_recall": 28.46,
+      "tampered_dice": 33.2,
+      "background_iou": 98.7,
+      "m_iou": 59.3
+    },
+    {
+      "threshold": 0.4,
+      "tampered_iou": 19.84,
+      "tampered_precision": 43.55,
+      "tampered_recall": 26.71,
+      "tampered_dice": 33.11,
+      "background_iou": 98.78,
+      "m_iou": 59.31
+    },
+    {
+      "threshold": 0.45,
+      "tampered_iou": 19.56,
+      "tampered_precision": 47.04,
+      "tampered_recall": 25.08,
+      "tampered_dice": 32.72,
+      "background_iou": 98.83,
+      "m_iou": 59.19
+    },
+    {
+      "threshold": 0.5,
+      "tampered_iou": 19.13,
+      "tampered_precision": 50.27,
+      "tampered_recall": 23.6,
+      "tampered_dice": 32.12,
+      "background_iou": 98.87,
+      "m_iou": 59.0
+    },
+    {
+      "threshold": 0.55,
+      "tampered_iou": 18.61,
+      "tampered_precision": 53.31,
+      "tampered_recall": 22.23,
+      "tampered_dice": 31.38,
+      "background_iou": 98.9,
+      "m_iou": 58.75
+    },
+    {
+      "threshold": 0.6,
+      "tampered_iou": 17.98,
+      "tampered_precision": 56.15,
+      "tampered_recall": 20.92,
+      "tampered_dice": 30.48,
+      "background_iou": 98.92,
+      "m_iou": 58.45
+    }
+  ]
+}

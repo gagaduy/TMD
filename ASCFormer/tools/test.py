@@ -6,6 +6,14 @@ import os.path as osp
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
 
+import torch
+_orig_load = torch.load
+def _safe_load(*args, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _orig_load(*args, **kwargs)
+torch.load = _safe_load
+
 
 # TODO: support fuse_conv_bn, visualization, and format_only
 def parse_args():

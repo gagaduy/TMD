@@ -23,8 +23,57 @@ from torch.nn.init import trunc_normal_
 
 from ..backbones.nat import NATLayer, ConvTokenizer
 
-from natten.functional import natten2dav, natten2dqkrpb
-from natten import NeighborhoodAttention2D as NeighborhoodAttention
+try:
+    from natten.functional import natten2dav, natten2dqkrpb
+    HAVE_LEGACY_NATTEN = True
+except (ImportError, ModuleNotFoundError):
+    HAVE_LEGACY_NATTEN = False
+    try:
+        from natten.functional import na2d
+    except (ImportError, ModuleNotFoundError):
+        def _fast_na2d_shift(q, k, v, scale: float, kernel_size: int = 5, dilation: int = 1):
+            B, H, W, nh, hd = q.shape
+            d = dilation or 1
+            pad = (kernel_size // 2) * d
+            q_s = q * scale
+            k_pad = F.pad(k, (0, 0, 0, 0, pad, pad, pad, pad))
+            v_pad = F.pad(v, (0, 0, 0, 0, pad, pad, pad, pad))
+            logits = []
+            for dy in range(kernel_size):
+                y0 = dy * d
+                for dx in range(kernel_size):
+                    x0 = dx * d
+                    k_slice = k_pad[:, y0:y0 + H, x0:x0 + W]
+                    logits.append((q_s * k_slice).sum(dim=-1))
+            attn = torch.stack(logits, dim=-1).softmax(dim=-1)
+            out = torch.zeros_like(q)
+            idx = 0
+            for dy in range(kernel_size):
+                y0 = dy * d
+                for dx in range(kernel_size):
+                    x0 = dx * d
+                    v_slice = v_pad[:, y0:y0 + H, x0:x0 + W]
+                    out = out + attn[..., idx:idx + 1] * v_slice
+                    idx += 1
+            return out
+
+        try:
+            _compiled_na2d_shift = torch.compile(_fast_na2d_shift)
+        except Exception:
+            _compiled_na2d_shift = _fast_na2d_shift
+
+        def na2d(q, k, v, kernel_size=5, dilation=1):
+            scale = float(q.shape[-1] ** -0.5)
+            d = int(dilation or 1)
+            ks = int(kernel_size)
+            if q.is_cuda:
+                return _compiled_na2d_shift(q, k, v, scale, ks, d)
+            return _fast_na2d_shift(q, k, v, scale, ks, d)
+
+try:
+    from natten import NeighborhoodAttention2D as NeighborhoodAttention
+except (ImportError, ModuleNotFoundError):
+    from ..backbones.nat import NeighborhoodAttention
 from timm.models.layers import DropPath
 
 class NATFusionModule(nn.Module):
@@ -94,27 +143,46 @@ class NATFusionModule(nn.Module):
             x = pad(x, (0, 0, pad_l, pad_r, pad_t, pad_b))
             _, H, W, _ = x.shape
 
-        if self.attn_mode == 'cross':
-            q = self.embed_q(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            v = self.embed_v(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-        elif self.attn_mode == 'self':
-            q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-        elif self.attn_mode == 'recross':
-            q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            k = self.embed_k(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-            v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
-        else:
-            raise NotImplementedError
+        if HAVE_LEGACY_NATTEN:
+            if self.attn_mode == 'cross':
+                q = self.embed_q(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                v = self.embed_v(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+            elif self.attn_mode == 'self':
+                q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+            elif self.attn_mode == 'recross':
+                q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                k = self.embed_k(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+                v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim).permute(0, 3, 1, 2, 4)
+            else:
+                raise NotImplementedError
 
-        q = q * self.scale
-        attn = natten2dqkrpb(q, k, self.rpb, self.kernel_size, self.dilation)
-        attn = attn.softmax(dim=-1)
-        attn = self.attn_drop(attn)
-        x = natten2dav(attn, v, self.kernel_size, self.dilation)
-        x = x.permute(0, 2, 3, 1, 4).reshape(B, H, W, C)
+            q = q * self.scale
+            attn = natten2dqkrpb(q, k, self.rpb, self.kernel_size, self.dilation)
+            attn = attn.softmax(dim=-1)
+            attn = self.attn_drop(attn)
+            x = natten2dav(attn, v, self.kernel_size, self.dilation)
+            x = x.permute(0, 2, 3, 1, 4).reshape(B, H, W, C)
+        else:
+            if self.attn_mode == 'cross':
+                q = self.embed_q(x).reshape(B, H, W, self.num_heads, self.head_dim)
+                k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim)
+                v = self.embed_v(y).reshape(B, H, W, self.num_heads, self.head_dim)
+            elif self.attn_mode == 'self':
+                q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim)
+                k = self.embed_k(y).reshape(B, H, W, self.num_heads, self.head_dim)
+                v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim)
+            elif self.attn_mode == 'recross':
+                q = self.embed_q(y).reshape(B, H, W, self.num_heads, self.head_dim)
+                k = self.embed_k(x).reshape(B, H, W, self.num_heads, self.head_dim)
+                v = self.embed_v(x).reshape(B, H, W, self.num_heads, self.head_dim)
+            else:
+                raise NotImplementedError
+
+            x = na2d(q, k, v, kernel_size=self.kernel_size, dilation=self.dilation)
+            x = x.reshape(B, H, W, C)
         if pad_r or pad_b:
             x = x[:, :Hp, :Wp, :]
 
