@@ -1,104 +1,107 @@
 {
-  "model": "M2_TriStream_OCR",
+  "config": "configs/ascformer/ascformer_rtm_b0_ablation16k_m2_tristream.py",
+  "checkpoint": "work_dirs/ablation16k_m2_tristream/iter_16000.pth",
+  "best_tau": 0.04,
+  "best_iou": 3.7721,
   "results": [
     {
       "threshold": 0.02,
-      "tampered_iou": 2.58,
-      "tampered_precision": 2.7,
-      "tampered_recall": 36.73,
-      "tampered_dice": 5.02,
-      "background_iou": 84.22,
-      "m_iou": 43.4
+      "tampered_iou": 2.5754,
+      "tampered_precision": 2.695,
+      "tampered_recall": 36.7264,
+      "tampered_dice": 5.0215,
+      "bg_iou": 84.2213,
+      "m_iou": 43.3984
     },
     {
       "threshold": 0.025,
-      "tampered_iou": 2.94,
-      "tampered_precision": 3.19,
-      "tampered_recall": 26.86,
-      "tampered_dice": 5.71,
-      "background_iou": 89.93,
-      "m_iou": 46.43
+      "tampered_iou": 2.937,
+      "tampered_precision": 3.1923,
+      "tampered_recall": 26.8632,
+      "tampered_dice": 5.7065,
+      "bg_iou": 89.9286,
+      "m_iou": 46.4328
     },
     {
       "threshold": 0.03,
-      "tampered_iou": 3.27,
-      "tampered_precision": 3.78,
-      "tampered_recall": 19.71,
-      "tampered_dice": 6.34,
-      "background_iou": 93.4,
-      "m_iou": 48.34
+      "tampered_iou": 3.2737,
+      "tampered_precision": 3.7775,
+      "tampered_recall": 19.7106,
+      "tampered_dice": 6.3399,
+      "bg_iou": 93.3986,
+      "m_iou": 48.3362
     },
     {
       "threshold": 0.035,
-      "tampered_iou": 3.58,
-      "tampered_precision": 4.48,
-      "tampered_recall": 15.09,
-      "tampered_dice": 6.91,
-      "background_iou": 95.39,
-      "m_iou": 49.48
+      "tampered_iou": 3.577,
+      "tampered_precision": 4.4781,
+      "tampered_recall": 15.0933,
+      "tampered_dice": 6.907,
+      "bg_iou": 95.3905,
+      "m_iou": 49.4838
     },
     {
       "threshold": 0.04,
-      "tampered_iou": 3.77,
-      "tampered_precision": 5.24,
-      "tampered_recall": 11.84,
+      "tampered_iou": 3.7721,
+      "tampered_precision": 5.2448,
+      "tampered_recall": 11.843,
       "tampered_dice": 7.27,
-      "background_iou": 96.58,
-      "m_iou": 50.18
+      "bg_iou": 96.5784,
+      "m_iou": 50.1753
     },
     {
       "threshold": 0.045,
-      "tampered_iou": 3.77,
-      "tampered_precision": 5.98,
-      "tampered_recall": 9.27,
-      "tampered_dice": 7.27,
-      "background_iou": 97.32,
-      "m_iou": 50.55
+      "tampered_iou": 3.7713,
+      "tampered_precision": 5.9776,
+      "tampered_recall": 9.2705,
+      "tampered_dice": 7.2685,
+      "bg_iou": 97.3218,
+      "m_iou": 50.5466
     },
     {
       "threshold": 0.05,
-      "tampered_iou": 3.58,
-      "tampered_precision": 6.64,
-      "tampered_recall": 7.19,
-      "tampered_dice": 6.91,
-      "background_iou": 97.8,
-      "m_iou": 50.69
+      "tampered_iou": 3.5762,
+      "tampered_precision": 6.6387,
+      "tampered_recall": 7.1947,
+      "tampered_dice": 6.9055,
+      "bg_iou": 97.8042,
+      "m_iou": 50.6902
     },
     {
       "threshold": 0.06,
-      "tampered_iou": 2.79,
-      "tampered_precision": 7.68,
-      "tampered_recall": 4.2,
-      "tampered_dice": 5.43,
-      "background_iou": 98.35,
-      "m_iou": 50.57
+      "tampered_iou": 2.7905,
+      "tampered_precision": 7.6847,
+      "tampered_recall": 4.1976,
+      "tampered_dice": 5.4295,
+      "bg_iou": 98.3454,
+      "m_iou": 50.5679
     },
     {
       "threshold": 0.08,
-      "tampered_iou": 1.15,
-      "tampered_precision": 9.73,
-      "tampered_recall": 1.28,
-      "tampered_dice": 2.26,
-      "background_iou": 98.75,
-      "m_iou": 49.95
+      "tampered_iou": 1.145,
+      "tampered_precision": 9.728,
+      "tampered_recall": 1.2811,
+      "tampered_dice": 2.2641,
+      "bg_iou": 98.7488,
+      "m_iou": 49.9469
     },
     {
       "threshold": 0.1,
-      "tampered_iou": 0.27,
-      "tampered_precision": 11.74,
-      "tampered_recall": 0.27,
-      "tampered_dice": 0.53,
-      "background_iou": 98.85,
-      "m_iou": 49.56
+      "tampered_iou": 0.2667,
+      "tampered_precision": 11.7364,
+      "tampered_recall": 0.2722,
+      "tampered_dice": 0.532,
+      "bg_iou": 98.8489,
+      "m_iou": 49.5578
     },
     {
       "threshold": 0.12,
-      "tampered_iou": 0.04,
-      "tampered_precision": 20.8,
-      "tampered_recall": 0.04,
-      "tampered_dice": 0.08,
-      "background_iou": 98.87,
-      "m_iou": 49.45
+      "tampered_iou": 0.0418,
+      "tampered_precision": 20.8003,
+      "tampered_recall": 0.0419,
+      "tampered_dice": 0.0837,
+      "bg_iou": 98.8677,
+      "m_iou": 49.4547
     },
     {
       "threshold": 0.15,
@@ -106,8 +109,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.2,
@@ -115,8 +118,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.25,
@@ -124,8 +127,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.3,
@@ -133,8 +136,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.35,
@@ -142,8 +145,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.4,
@@ -151,8 +154,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.45,
@@ -160,8 +163,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     },
     {
       "threshold": 0.5,
@@ -169,8 +172,8 @@
       "tampered_precision": 0.0,
       "tampered_recall": 0.0,
       "tampered_dice": 0.0,
-      "background_iou": 98.87,
-      "m_iou": 49.43
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
     }
   ]
 }
