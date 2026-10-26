@@ -165,3 +165,4 @@ artifacts/
 *.pth
 work_dirs/
 *.pdf
+mobile_app/
