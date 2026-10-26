@@ -3,6 +3,19 @@ import sys
 from os.path import dirname, abspath
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
+# Fix compatibility between mmengine 0.7.0 and modern yapf (which removed verify argument)
+try:
+    import yapf.yapflib.yapf_api
+    import mmengine.config.config as mmcfg
+    _orig_FormatCode = yapf.yapflib.yapf_api.FormatCode
+    def _safe_FormatCode(*args, **kwargs):
+        kwargs.pop('verify', None)
+        return _orig_FormatCode(*args, **kwargs)
+    yapf.yapflib.yapf_api.FormatCode = _safe_FormatCode
+    mmcfg.FormatCode = _safe_FormatCode
+except Exception:
+    pass
+
 import argparse
 import logging
 import os
