@@ -1,4 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import sys
+from os.path import dirname, abspath
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
+
 import argparse
 import os
 import os.path as osp
