@@ -10,13 +10,11 @@ c0 = {
     'source': [
         '# ⚡ HUẤN LUYỆN MÔ HÌNH SIÊU NHẸ MiT-B0 CHO MOBILE (30,000 ITERS)\n',
         '\n',
-        '> **Mục tiêu chiến lược:**\n',
-        '> * Huấn luyện phiên bản **SegFormer MiT-B0** (~3.7M params/stream) với đầy đủ 3 đóng góp (Tri-stream + Dual Prototype + Focused Crop).\n',
-        '> * **Thời gian huấn luyện dự kiến:**\n',
-        '>   * **NVIDIA A100 (Colab Pro):** ~2 tiếng 15 phút\n',
-        '>   * **NVIDIA T4 (Colab Miễn phí):** ~5 tiếng 30 phút\n',
-        '>   * **NVIDIA L4 / V100:** ~3 tiếng 30 phút\n',
-        '> * **Kết quả kỳ vọng:** Tamper IoU đạt **~13.0% – 14.5%** (vượt xa CAT-Net v2 11.3% và DocTamper 6.5%), dung lượng file ONNX chỉ còn **~25 MB**, tốc độ quét trên điện thoại đạt **~1.5 giây / ô**!'
+        '> **Kiến trúc mô hình:**\n',
+        '> * **Backbone:** SegFormer MiT-B0 siêu nhẹ (~3.7M params/stream, tổng ~25.8M params).\n',
+        '> * **3 Đóng góp SOTA:** Tri-stream (RGB + ELA + OCR Spatial) + Dual Prototype Contrastive Head + Focused Crop.\n',
+        '> * **Thời gian huấn luyện trên GPU A100:** ~2 tiếng 15 phút (3.6 – 3.8 iter/s).\n',
+        '> * **Dung lượng xuất ONNX INT8:** Siêu nhẹ ~25–35 MB (tốc độ ~1.5 giây / ô trên điện thoại).'
     ]
 }
 cells.append(c0)
@@ -27,7 +25,7 @@ c1_md = {
     'metadata': {},
     'source': [
         '### 🟢 BƯỚC 1: KẾT NỐI DRIVE & CÀI ĐẶT MÔI TRƯỜNG (~3 Phút)\n',
-        '> Nhấn chạy Cell này để tự động kết nối Google Drive, tải mã nguồn và giải nén Dataset.'
+        '> Nhấn chạy Cell này để kết nối Google Drive, tải mã nguồn TMD mới nhất và giải nén Dataset.'
     ]
 }
 cells.append(c1_md)
@@ -39,17 +37,23 @@ c1_code = {
     'outputs': [],
     'source': [
         '# 1. Kết nối Google Drive\n',
-        'import os, shutil, glob\n',
+        'import os, sys, glob, shutil\n',
         'from google.colab import drive\n',
         'drive.mount("/content/drive")\n',
         '\n',
-        '# 2. Clone mã nguồn RTM mới nhất từ GitHub\n',
+        '# 2. Clone mã nguồn RTM mới nhất từ GitHub main branch\n',
         '%cd /content\n',
         '!rm -rf TMD\n',
         '!git clone https://github.com/gagaduy/TMD.git\n',
-        '%cd /content/TMD/ASCFormer\n',
         '\n',
-        '# 3. Copy và Giải nén Dataset RealTextMan từ Google Drive sang Colab SSD\n',
+        '# 3. Khai báo đường dẫn ASCFormer vào PYTHONPATH\n',
+        'sys.path.insert(0, "/content/TMD/ASCFormer")\n',
+        '%env PYTHONPATH=/content/TMD/ASCFormer\n',
+        '\n',
+        '# 4. Cài đặt các thư viện cần thiết\n',
+        '!pip install -q mmcv-lite==2.0.0 mmengine==0.7.0 timm einops prettytable rich onnx onnxruntime\n',
+        '\n',
+        '# 5. Giải nén Dataset RealTextMan từ Google Drive sang Colab SSD\n',
         'os.makedirs("/content/TMD/ASCFormer/data/ttd", exist_ok=True)\n',
         'drive_zip = "/content/drive/MyDrive/RealTextMan.zip"\n',
         'if not os.path.exists(drive_zip):\n',
@@ -60,14 +64,12 @@ c1_code = {
         '        raise FileNotFoundError("Không tìm thấy file RealTextMan.zip trên Google Drive của bạn!")\n',
         '\n',
         'print(f"📦 Đang giải nén {drive_zip} sang ổ cứng SSD của Colab...")\n',
-        '!unzip -q "{drive_zip}" -d /content/TMD/ASCFormer/data/ttd/\n',
-        'print("✅ Dataset đã sẵn sàng tại /content/TMD/ASCFormer/data/ttd/RealTextMan")\n',
+        '!unzip -q -o "{drive_zip}" -d /content/TMD/ASCFormer/data/ttd/\n',
         '\n',
-        '# 4. Cài đặt các thư viện cần thiết\n',
-        '!pip install -q mmcv-lite==2.0.0 mmengine==0.7.0 timm einops prettytable rich onnx onnxruntime\n',
-        '%env PYTHONPATH=/content/TMD/ASCFormer\n',
-        '\n',
-        'print("🎉 CÀI ĐẶT MÔI TRƯỜNG THÀNH CÔNG!")\n'
+        '# Kiểm tra tính toàn vẹn dataset\n',
+        'dataset_dir = "/content/TMD/ASCFormer/data/ttd/RealTextMan/JPEGImages"\n',
+        'assert os.path.exists(dataset_dir), f"Lỗi: Không tìm thấy thư mục {dataset_dir}"\n',
+        'print("🎉 BƯỚC 1 HOÀN TẤT: Môi trường và Dataset đã sẵn sàng 100%!")\n'
     ]
 }
 cells.append(c1_code)
@@ -80,7 +82,7 @@ c2_md = {
         '### 🔥 BƯỚC 2: BẮT ĐẦU HUẤN LUYỆN MiT-B0 (30,000 BƯỚC) + TỰ ĐỘNG LƯU DRIVE\n',
         '> * Tự động tải trước trọng số pretrained `mit_b0.pth`.\n',
         '> * Checkpoint và file Log được lưu liên tục vào Google Drive (`/content/drive/MyDrive/RTM_B0_30k_Mobile`).\n',
-        '> * Nếu Colab bị ngắt giữa chừng, bạn chỉ cần bấm chạy lại Cell này, nó sẽ **tự động `--resume` từ checkpoint gần nhất**!'
+        '> * Nếu Colab bị ngắt kết nối giữa chừng, bạn chỉ cần bấm chạy lại Cell này, nó sẽ **tự động `--resume` từ checkpoint gần nhất**!'
     ]
 }
 cells.append(c2_md)
@@ -91,15 +93,10 @@ c2_code = {
     'metadata': {},
     'outputs': [],
     'source': [
-        'import os, glob, json, torch\n',
+        'import os, sys, glob, json, torch\n',
         '\n',
-        '%cd /content/TMD\n',
-        '!git pull origin main\n',
         '%cd /content/TMD/ASCFormer\n',
-        '\n',
-        '# Đảm bảo đường dẫn module mmseg luôn được nhận diện\n',
         '%env PYTHONPATH=/content/TMD/ASCFormer\n',
-        'import sys\n',
         'if "/content/TMD/ASCFormer" not in sys.path:\n',
         '    sys.path.insert(0, "/content/TMD/ASCFormer")\n',
         '\n',
@@ -113,30 +110,6 @@ c2_code = {
         'CFG_PATH = "configs/ascformer/ascformer_rtm_b0_30k_sota_mobile.py"\n',
         'DRIVE_WORK_DIR = "/content/drive/MyDrive/RTM_B0_30k_Mobile"\n',
         'os.makedirs(DRIVE_WORK_DIR, exist_ok=True)\n',
-        '\n',
-        '# Tự động tạo file config nếu chưa có trên repo\n',
-        'if not os.path.exists(CFG_PATH):\n',
-        '    print("⚙️ Đang khởi tạo file config B0 30k chuẩn...")\n',
-        '    with open(CFG_PATH, "w", encoding="utf-8") as f:\n',
-        '        f.write(\'\'\'_base_ = ["./ascformer_rtm_b0_ablation16k_m4_proto.py"]\n',
-        '\n',
-        'train_dataloader = dict(batch_size=4, num_workers=4, persistent_workers=True, pin_memory=True)\n',
-        'val_dataloader = dict(batch_size=1, num_workers=4, persistent_workers=True, pin_memory=True)\n',
-        'test_dataloader = dict(batch_size=1, num_workers=4, persistent_workers=True, pin_memory=True, dataset=dict(ann_file="val.txt"))\n',
-        'train_cfg = dict(max_iters=30000, val_interval=10000)\n',
-        'param_scheduler = [\n',
-        '    dict(type="LinearLR", start_factor=1e-6, by_epoch=False, begin=0, end=1500),\n',
-        '    dict(type="PolyLR", eta_min=0., power=1., by_epoch=False, begin=1500, end=30000),\n',
-        ']\n',
-        'optim_wrapper = dict(\n',
-        '    type="AmpOptimWrapper", loss_scale="dynamic",\n',
-        '    optimizer=dict(type="AdamW", lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01),\n',
-        '    paramwise_cfg=dict(custom_keys=dict(pos_block=dict(decay_mult=0.0), norm=dict(decay_mult=0.0), head=dict(lr_mult=10.0), rpb=dict(decay_mult=0.0)))\n',
-        ')\n',
-        'default_hooks = dict(checkpoint=dict(type="CheckpointHook", interval=5000, max_keep_ckpts=3, save_best="mIoU", rule="greater"))\n',
-        'val_evaluator = dict(type="BinaryIoUMetric", iou_metrics=["mIoU", "mDice", "mFscore"], output_dir="work_dirs/b0_30k_sota_mobile/val_metrics", save_confusion_matrix=True)\n',
-        '\'\'\')\n',
-        '    print("✅ File config đã sẵn sàng!")\n',
         '\n',
         '# Kiểm tra Checkpoint cũ trên Drive để Resume nếu có\n',
         'ckpts = sorted(glob.glob(f"{DRIVE_WORK_DIR}/iter_*.pth"), key=os.path.getmtime)\n',
@@ -159,8 +132,8 @@ c3_md = {
     'cell_type': 'markdown',
     'metadata': {},
     'source': [
-        '### 📦 BƯỚC 3: XUẤT MODEL ONNX INT8 SIÊU NHẸ (~25 MB) SANG GOOGLE DRIVE\n',
-        '> Chạy Cell này để tự động nén mô hình sang định dạng ONNX INT8 siêu nhẹ (~25 MB) để tích hợp vào Android App.'
+        '### 📦 BƯỚC 3: XUẤT MODEL ONNX INT8 SIÊU NHẸ SANG GOOGLE DRIVE\n',
+        '> Chạy Cell này để tự động nén mô hình sang định dạng ONNX INT8 siêu nhẹ để tích hợp vào Android App.'
     ]
 }
 cells.append(c3_md)
@@ -171,7 +144,12 @@ c3_code = {
     'metadata': {},
     'outputs': [],
     'source': [
-        'import os, glob\n',
+        'import os, sys, glob\n',
+        '\n',
+        '%cd /content/TMD/ASCFormer\n',
+        '%env PYTHONPATH=/content/TMD/ASCFormer\n',
+        'if "/content/TMD/ASCFormer" not in sys.path:\n',
+        '    sys.path.insert(0, "/content/TMD/ASCFormer")\n',
         '\n',
         'DRIVE_WORK_DIR = "/content/drive/MyDrive/RTM_B0_30k_Mobile"\n',
         'best_ckpts = sorted(glob.glob(f"{DRIVE_WORK_DIR}/*best*.pth") + glob.glob(f"{DRIVE_WORK_DIR}/iter_*.pth"), key=os.path.getmtime)\n',
@@ -182,7 +160,6 @@ c3_code = {
         '\n',
         '# Xuất mô hình sang ONNX INT8\n',
         'out_onnx = f"{DRIVE_WORK_DIR}/rtm_b0_int8.onnx"\n',
-        '%cd /content/TMD/ASCFormer\n',
         '!python tools/export_ondevice_model.py \\\n',
         '    --config configs/ascformer/ascformer_rtm_b0_30k_sota_mobile.py \\\n',
         '    --checkpoint "{best_ckpt}" \\\n',
@@ -191,7 +168,7 @@ c3_code = {
         'if os.path.exists(out_onnx):\n',
         '    sz_mb = os.path.getsize(out_onnx) / (1024 * 1024)\n',
         '    print(f"✅ ĐÃ XUẤT THÀNH CÔNG MODEL ONNX SIÊU NHẸ: {out_onnx} ({sz_mb:.1f} MB)")\n',
-        '    print("📲 Bạn chỉ cần tải file rtm_b0_int8.onnx từ Google Drive về là xong!")\n'
+        '    print("📲 File đã lưu an toàn trên Google Drive của bạn! Bạn có thể tải về máy hoặc nạp vào APK.")\n'
     ]
 }
 cells.append(c3_code)

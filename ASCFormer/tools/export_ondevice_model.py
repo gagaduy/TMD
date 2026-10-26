@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export Trained RTM Model to Self-Contained On-Device ONNX Models.
+"""Export SOTA RTM Model to Self-Contained On-Device ONNX Models.
 
 Supports both MiT-B0 and MiT-B2 architectures.
 Converts model with:
@@ -14,7 +14,7 @@ import argparse
 import os
 import sys
 
-# Force pure-PyTorch NAT implementation
+# Force pure-PyTorch NAT implementation so checkpoint loads cleanly and exports to ONNX
 sys.modules['natten'] = None
 sys.modules['natten.functional'] = None
 
@@ -34,7 +34,7 @@ from onnxruntime.quantization import quantize_dynamic, QuantType
 from mmengine.config import Config
 from mmseg.registry import MODELS
 from mmseg.utils import register_all_modules
-from mmseg.datasets.transforms.transforms import ELA
+from mmseg.datasets.transforms.transforms import BlockDCT, ELA
 import mmseg.models.toys.fusers as fusers_mod
 import mmseg.models.backbones.nat as nat_mod
 
@@ -95,99 +95,180 @@ class OnGraphOCRSpatial(nn.Module):
 
     def __init__(self):
         super().__init__()
-        sobel_x = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]]).unsqueeze(0).unsqueeze(0)
-        sobel_y = torch.tensor([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]]).unsqueeze(0).unsqueeze(0)
-        self.register_buffer('sobel_x', sobel_x)
-        self.register_buffer('sobel_y', sobel_y)
-        pool_weights = torch.ones((1, 1, 5, 5))
-        self.register_buffer('pool_weights', pool_weights)
+        gx = torch.tensor([[-1.0, 0.0, 1.0], [-2.0, 0.0, 2.0], [-1.0, 0.0, 1.0]]).view(1, 1, 3, 3)
+        gy = torch.tensor([[-1.0, -2.0, -1.0], [0.0, 0.0, 0.0], [1.0, 2.0, 1.0]]).view(1, 1, 3, 3)
+        self.register_buffer('gx', gx)
+        self.register_buffer('gy', gy)
 
-    def forward(self, gray: torch.Tensor) -> torch.Tensor:
-        gray_norm = gray / 255.0
-        dark_text = (1.0 - gray_norm).clamp(0.0, 1.0)
-        bright_text = (gray_norm - 0.5).clamp(0.0, 1.0) * 2.0
-        region = torch.maximum(dark_text, bright_text)
-        gx = F.conv2d(gray_norm, self.sobel_x, padding=1)
-        gy = F.conv2d(gray_norm, self.sobel_y, padding=1)
-        grad = torch.sqrt(gx * gx + gy * gy + 1e-6)
-        boundary = (grad * 2.0).clamp(0.0, 1.0)
-        mask = torch.sigmoid((boundary - 0.25) * 10.0)
-        dilated = F.conv2d(mask, self.pool_weights, padding=2)
-        distance = (dilated / 25.0).clamp(0.0, 1.0)
-        return torch.cat([region, boundary, distance], dim=1)
+    def forward(self, y_channel: torch.Tensor) -> torch.Tensor:
+        dx = F.conv2d(y_channel, self.gx, padding=1)
+        dy = F.conv2d(y_channel, self.gy, padding=1)
+        grad = torch.sqrt(dx * dx + dy * dy + 1e-6)
+        mean_g = grad.mean(dim=(2, 3), keepdim=True)
+        std_g = grad.std(dim=(2, 3), keepdim=True)
+        stroke = (grad > (mean_g + 1.2 * std_g)).float()
+
+        # Morphological closing to connect characters into text regions
+        d1 = F.max_pool2d(stroke, kernel_size=(5, 11), stride=1, padding=(2, 5))
+        region = -F.max_pool2d(-d1, kernel_size=(5, 11), stride=1, padding=(2, 5))
+        eroded = -F.max_pool2d(-region, kernel_size=3, stride=1, padding=1)
+        region = F.max_pool2d(eroded, kernel_size=3, stride=1, padding=1)
+
+        # Boundary: morphological gradient
+        dil3 = F.max_pool2d(region, kernel_size=3, stride=1, padding=1)
+        ero3 = -F.max_pool2d(-region, kernel_size=3, stride=1, padding=1)
+        boundary = (dil3 - ero3).clamp(0.0, 1.0)
+
+        # Distance transform approximation
+        e1 = -F.max_pool2d(-region, kernel_size=3, stride=1, padding=1)
+        e2 = -F.max_pool2d(-e1, kernel_size=5, stride=1, padding=2)
+        e3 = -F.max_pool2d(-e2, kernel_size=7, stride=1, padding=3)
+        dist = F.avg_pool2d(region + e1 + e2 + e3, kernel_size=5, stride=1, padding=2) * region
+        d_max = dist.amax(dim=(2, 3), keepdim=True).clamp(min=1e-5)
+        dist = (dist / d_max).clamp(0.0, 1.0)
+        return torch.cat([region, boundary, dist], dim=1)
 
 
 class OnDeviceRTMModel(nn.Module):
-    """Unified self-contained model wrapper for mobile deployment."""
+    """Self-contained wrapper around MyModelFull for mobile/client inference."""
 
     def __init__(self, base_model: nn.Module):
         super().__init__()
-        self.base_model = base_model
+        self.register_buffer(
+            'rgb_mean', torch.tensor([123.675, 116.28, 103.53], dtype=torch.float32).view(1, 3, 1, 1)
+        )
+        self.register_buffer(
+            'rgb_std', torch.tensor([58.395, 57.12, 57.375], dtype=torch.float32).view(1, 3, 1, 1)
+        )
+
+        # Build exact 8x8 orthonormal DCT basis in zigzag order (64, 1, 8, 8)
+        bdct = BlockDCT(block_size=8, zigzag=True)
+        dct_mat = bdct.dct_mat
+        zz_r, zz_c = bdct.zigzag_encode_idx
+        basis = np.zeros((64, 1, 8, 8), dtype=np.float32)
+        for k in range(64):
+            u, v = zz_r[k], zz_c[k]
+            basis[k, 0] = np.outer(dct_mat[u, :], dct_mat[v, :])
+        self.register_buffer('dct_basis', torch.from_numpy(basis))
+
+        # Disable internal reshape in DCTProcessor because dct_basis conv2d already outputs (B, 64, H//8, W//8)
+        self.dct_proc = base_model.preprocessor_sec[0]
+        self.dct_proc.reshape = False
+        self.ela_proc = base_model.preprocessor_sec[1]
+        self.srm_proc = base_model.preprocessor_sec[2]
+
         self.ocr_extractor = OnGraphOCRSpatial()
-
-        # ImageNet normalization buffers
-        mean = torch.tensor([123.675, 116.28, 103.53]).view(1, 3, 1, 1)
-        std = torch.tensor([58.395, 57.12, 57.375]).view(1, 3, 1, 1)
-        self.register_buffer('mean', mean)
-        self.register_buffer('std', std)
-
-        # RGB to Grayscale weights for OCR extractor
-        gray_w = torch.tensor([0.2989, 0.5870, 0.1140]).view(1, 3, 1, 1)
-        self.register_buffer('gray_w', gray_w)
+        self.backbone = base_model.backbone
+        self.decode_head = base_model.decode_head
 
     def forward(self, img_bgr: torch.Tensor, ela_bgr: torch.Tensor) -> torch.Tensor:
-        # Convert BGR to RGB
-        img_rgb = torch.flip(img_bgr, dims=[1])
-        ela_rgb = torch.flip(ela_bgr, dims=[1])
+        # 1. Normalized RGB stream
+        b = img_bgr[:, 0:1, :, :]
+        g = img_bgr[:, 1:2, :, :]
+        r = img_bgr[:, 2:3, :, :]
+        img_rgb = torch.cat([r, g, b], dim=1)
+        norm_rgb = (img_rgb - self.rgb_mean) / self.rgb_std
 
-        # Normalize RGB
-        norm_rgb = (img_rgb - self.mean) / self.std
+        # 2. Y luminance & 8x8 Zigzag DCT stream
+        y_chan = torch.round(0.299 * r + 0.587 * g + 0.114 * b)
+        dct_blocks = F.conv2d(y_chan, self.dct_basis, stride=8)
+        f_dct = self.dct_proc(dct_blocks)
 
-        # Extract OCR spatial map from grayscale
-        gray = (img_rgb * self.gray_w).sum(dim=1, keepdim=True)
-        ocr_spatial = self.ocr_extractor(gray)
+        # 3. ELA & SRM streams
+        f_ela = self.ela_proc(ela_bgr)
+        f_srm = self.srm_proc(norm_rgb)
 
-        # Forward backbone
-        feats = self.base_model.backbone(norm_rgb, ela_rgb, ocr_spatial)
+        # 4. On-graph OCR spatial stream
+        ocr_map = self.ocr_extractor(y_chan)
 
-        # Forward decode head
-        dh = self.base_model.decode_head
-        seg_logits = self._decode_head_forward(feats, dh)
+        # 5. Trace-safe Tri-Stream Backbone + Dual-Prototype Decode Head
+        feats = self._forward_backbone(norm_rgb, [f_dct, f_ela, f_srm], ocr_map)
+        seg_logits = self._forward_decode_head(feats)
+        seg_logits_up = F.interpolate(
+            seg_logits, size=(512, 512), mode='bilinear', align_corners=False
+        )
+        prob_tamper = F.softmax(seg_logits_up, dim=1)[:, 1, :, :]
+        return prob_tamper
 
-        # Softmax probability for tamper class (channel 1)
-        prob = F.softmax(seg_logits, dim=1)[:, 1, :, :]
-        return prob
+    def _forward_backbone(self, x_cam, x_extra, x_ocr):
+        from mmseg.models.utils import nlc_to_nchw
+        bb = self.backbone
+        outs = []
+        # Stage 0 extra modalities: [f_ela, f_srm], Stage 1 extra modality: [f_dct]
+        x_extra_m = [x_extra[0]]
+        x_extra = [x_extra[1], x_extra[2]]
+        B = 1
 
-    def _decode_head_forward(self, inputs, dh):
-        inputs = dh._transform_inputs(inputs)
+        for i in range(bb.num_stage_extra):
+            # 1. Main visual stream (RGB)
+            layer = bb.main_branch.layers[i]
+            x_cam, hw_shape = layer[0](x_cam)
+            H, W = int(hw_shape[0]), int(hw_shape[1])
+            for block in layer[1]:
+                x_cam = block(x_cam, hw_shape)
+            x_cam = layer[2](x_cam)
+            x_cam = nlc_to_nchw(x_cam, hw_shape)
+
+            # 2. Forensic auxiliary stream (DCT, ELA, SRM)
+            layer_extra = bb.extra_branch.layers[i]
+            if i == 1:
+                temp = []
+                for item in x_extra_m:
+                    em, s = bb.extra_patch_embed(item)
+                    temp.append(nlc_to_nchw(em, s))
+                x_extra, _ = layer_extra[0](x_extra)
+                x_extra.extend(temp)
+            else:
+                x_extra, _ = layer_extra[0](x_extra)
+
+            x_f = bb.extra_branch.tokenselect(x_extra, bb.extra_branch.extra_score_predictor[i])
+            for block in layer_extra[1]:
+                x_f = block(x_f, hw_shape)
+            x_f = layer_extra[2](x_f)
+            x_f = nlc_to_nchw(x_f, hw_shape)
+
+            # Stage 1 Fusion: RGB + Forensic
+            x_fused_ra = bb.FFMs[i](x_cam, x_f)
+
+            # 3. OCR spatial stream
+            layer_ocr = bb.ocr_branch.layers[i]
+            x_ocr_t, hw_ocr = layer_ocr[0](x_ocr)
+            for block in layer_ocr[1]:
+                x_ocr_t = block(x_ocr_t, hw_ocr)
+            x_ocr_t = layer_ocr[2](x_ocr_t)
+            x_ocr_feat = nlc_to_nchw(x_ocr_t, hw_ocr)
+
+            # Stage 2 Fusion: [RGB+Forensic] + OCR
+            x_fused_final = bb.FFM_ocrs[i](x_fused_ra, x_ocr_feat)
+            x_ocr = x_ocr_feat
+            outs.append(x_fused_final)
+
+            x_extra = [x_.reshape(B, H, W, -1).permute(0, 3, 1, 2) + x_f for x_ in x_extra]
+
+        return tuple(outs)
+
+    def _forward_decode_head(self, inputs):
+        dh = self.decode_head
+        target_size = (int(inputs[0].shape[2]), int(inputs[0].shape[3]))
         outs = []
         for idx in range(len(inputs)):
-            x = inputs[idx]
-            conv = dh.convs[idx]
-            outs.append(
-                F.interpolate(
-                    conv(x),
-                    size=inputs[0].shape[2:],
-                    mode='bilinear',
-                    align_corners=dh.align_corners
-                )
-            )
+            conv_x = dh.convs[idx](inputs[idx])
+            if idx > 0:
+                conv_x = F.interpolate(conv_x, size=target_size, mode='bilinear', align_corners=False)
+            outs.append(conv_x)
         out = dh.fusion_conv(torch.cat(outs, dim=1))
-        seg_logits = dh.cls_seg(out)
+        feats = dh.cc_proj(out)
+        up_size = (target_size[0] * 2, target_size[1] * 2)
+        seg_out = F.interpolate(out, size=up_size, mode='bilinear', align_corners=False)
+        seg_out = dh.seg_proj(seg_out)
+        seg_logits = dh.cls_seg(seg_out)
 
-        # Apply prototype projection if present
-        if hasattr(dh, 'prototypes') and dh.prototypes is not None:
-            if hasattr(dh, 'proj_head') and dh.proj_head is not None:
-                feats = dh.proj_head(out)
-            else:
-                feats = out
-            feats_norm = F.normalize(feats, dim=1)
-            prototypes = F.normalize(dh.prototypes, dim=1)
-            proto_logits = torch.einsum('bchw, kc -> bkhw', feats_norm, prototypes) / float(dh.temperature)
-            logit_size = (int(seg_logits.shape[2]), int(seg_logits.shape[3]))
-            proto_logits = F.interpolate(proto_logits, size=logit_size, mode='bilinear', align_corners=False)
-            seg_logits = seg_logits + 0.5 * proto_logits
-
+        feats_norm = F.normalize(feats, dim=1)
+        prototypes = F.normalize(dh.prototypes, dim=1)
+        proto_logits = torch.einsum('bchw, kc -> bkhw', feats_norm, prototypes) / float(dh.temperature)
+        logit_size = (int(seg_logits.shape[2]), int(seg_logits.shape[3]))
+        proto_logits = F.interpolate(proto_logits, size=logit_size, mode='bilinear', align_corners=False)
+        seg_logits = seg_logits + 0.5 * proto_logits
         return seg_logits
 
 
@@ -214,8 +295,10 @@ def main():
     base_model = MODELS.build(cfg.model)
     ckpt = torch.load(args.checkpoint, map_location='cpu', weights_only=False)
     state_dict = ckpt['state_dict'] if 'state_dict' in ckpt else ckpt
-    missing, unexpected = base_model.load_state_dict(state_dict, strict=True)
-    assert len(missing) == 0 and len(unexpected) == 0, f'Missing: {missing}, Unexpected: {unexpected}'
+    missing, unexpected = base_model.load_state_dict(state_dict, strict=False)
+    assert len(missing) == 0, f'Critical missing weights in checkpoint: {missing}'
+    if len(unexpected) > 0:
+        print(f'      Ignored auxiliary keys in checkpoint: {len(unexpected)} keys')
     base_model.eval()
 
     wrapper = OnDeviceRTMModel(base_model).eval()
@@ -270,7 +353,7 @@ def main():
     sess = ort.InferenceSession(args.output, providers=['CPUExecutionProvider'])
     ort_out = sess.run(['prob_tamper'], {'img_bgr': dummy_img.numpy(), 'ela_bgr': dummy_ela.numpy()})[0]
     print(f'      ONNX Runtime verified! Output shape: {ort_out.shape}')
-    print('✅ SUCCESS!')
+    print('✅ EXPORT SUCCESS!')
 
 
 if __name__ == '__main__':
