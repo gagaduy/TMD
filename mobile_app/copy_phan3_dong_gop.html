@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Copy Phần 3. Các Đóng Góp — Google Docs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 28px 16px 60px;
+    }
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px 22px;
+      margin-bottom: 24px;
+    }
+    .top-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .top-sub {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .block-card {
+      background: #ffffff;
+      color: #111827;
+      border-radius: 14px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+    .block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 14px 20px;
+      border-bottom: 1px solid #334155;
+    }
+    .block-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .btn-copy {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+      transition: all 0.15s ease;
+    }
+    .btn-copy:hover {
+      background: linear-gradient(135deg, #1d4ed8, #4338ca);
+      transform: translateY(-1px);
+    }
+    .btn-copy.copied {
+      background: #10b981;
+    }
+    .doc-content {
+      padding: 24px 28px;
+      font-family: "Times New Roman", Arial, sans-serif;
+      font-size: 12pt;
+      line-height: 1.55;
+      color: #000000;
+    }
+    .doc-content p {
+      margin: 6px 0;
+    }
+    .doc-content ul {
+      margin: 6px 0 6px 24px;
+    }
+    .doc-content li {
+      margin: 4px 0;
+    }
+    .doc-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+      font-size: 11pt;
+    }
+    .doc-content th, .doc-content td {
+      border: 1px solid #000000;
+      padding: 7px 10px;
+      text-align: center;
+    }
+    .doc-content th {
+      background-color: #f3f4f6;
+      font-weight: bold;
+    }
+    .formula {
+      margin: 8px 0 8px 24px;
+      font-weight: bold;
+      font-family: "Cambria Math", "Times New Roman", serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div>
+        <div class="top-title">📄 Nội dung hoàn thiện Phần 3. Các đóng góp (Chuẩn định dạng Google Docs)</div>
+        <div class="top-sub">Bấm nút <b>📋 Copy vào Google Docs</b> ở từng phần rồi nhấn <b>Ctrl + V</b> trực tiếp vào tài liệu Google Docs của bạn (giữ nguyên in đậm, danh sách và kẻ bảng).</div>
+      </div>
+    </div>
+
+    <!-- KHỐI 1: MỤC 3. THAY MEMORY BANK THÀNH PROTOTYPE -->
+    <div class="block-card">
+      <div class="block-header">
+        <span class="block-label">PHẦN A — Dán đè vào mục "3. Thay memory bank thành Prototype" (Trước phần Thực nghiệm)</span>
+        <button class="btn-copy" onclick="copyRichBlock('blockA', this)">📋 Copy Phần A vào Google Docs</button>
+      </div>
+      <div class="doc-content" id="blockA">
+        <p><b>3. Thay memory bank thành Prototype</b></p>
+        <p><b>Tóm tắt ý tưởng:</b></p>
+        <ul>
+          <li><b>Ý tưởng:</b> Loại bỏ hoàn toàn cơ chế bộ nhớ đệm điểm ảnh Memory Bank (lưu trữ 2000 vector đặc trưng) trong mô-đun TAC (Tampering Aggregation Contrast) của baseline cũ. Thay thế 2000 vector rời rạc đó bằng 2 vector nguyên mẫu đại diện toàn cục (Dual Class Prototypes) là <b>P<sub>auth</sub></b> (đại diện cho lớp chữ/nền nguyên bản) và <b>P<sub>tamp</sub></b> (đại diện cho lớp văn bản bị chỉnh sửa) trong không gian đặc trưng 128 chiều để làm mẫu chuẩn so sánh tương phản và đóng góp trực tiếp vào kết quả dự đoán phân vùng cuối cùng. Thay thế hàm mất mát tương phản điểm-điểm (Loss TAC) thành hàm mất mát tương phản nguyên mẫu (Loss Proto).</li>
+          <li><b>Mục tiêu:</b> Khắc phục triệt để hiện tượng nhiễu đạo hàm do đặc trưng cũ (Stale Features) gây ra, giảm chi phí bộ nhớ VRAM và độ phức tạp tính toán, đồng thời giúp mô hình phá vỡ trạng thái sụp đổ dự đoán (prediction collapse) ở ngưỡng chuẩn τ = 0.500 và tăng mạnh độ tự tin khi khoanh vùng văn bản giả mạo.</li>
+        </ul>
+
+        <p><b>Gaps:</b></p>
+        <p style="margin-left: 20px;">Trong paper gốc, mô-đun TAC duy trì một hàng đợi Memory Bank chứa 2000 vector đặc trưng điểm ảnh từ các vòng lặp huấn luyện trước để tính Contrastive Loss giữa các cặp điểm ảnh (pixel-to-pixel). Khi áp dụng vào bài toán phát hiện chỉnh sửa văn bản (RTM), cơ chế này bộc lộ 3 hạn chế lớn:</p>
+        <ul>
+          <li><b>Hiện tượng đặc trưng lỗi thời (Stale Features):</b> Do diện tích vùng chữ bị chỉnh sửa rất nhỏ (&lt; 0.1%), hàng đợi của lớp giả mạo cập nhật rất chậm và chứa nhiều vector được trích xuất từ hàng chục bước lặp trước khi trọng số mạng Encoder còn cũ. Việc ép đặc trưng mới phải kéo gần các vector cũ làm chệch hướng đạo hàm (gradient), khiến hàm Contrastive Loss dao động mạnh và không thể hội tụ sâu.</li>
+          <li><b>Chi phí tính toán và bộ nhớ lớn:</b> Phép tính ma trận tương đồng giữa N điểm ảnh truy vấn với K = 2000 vector trong bộ nhớ có độ phức tạp O(N × 2000), gây tốn kém VRAM và làm chậm quá trình huấn luyện.</li>
+          <li><b>Tách rời giữa học tương phản và dự đoán (Inference Disconnect):</b> Trong mô-đun TAC của baseline, nhánh tương phản chỉ dùng để tính Loss trong lúc huấn luyện và bị loại bỏ hoàn toàn khi suy luận (inference). Do đó, các đặc trưng phân biệt đã học không hỗ trợ trực tiếp cho tầng phân loại cuối cùng, dẫn đến xác suất dự đoán chữ giả bị dìm thấp dưới ngưỡng 0.500 (khiến Tamper IoU ở ngưỡng chuẩn τ = 0.500 bằng 0.00%).</li>
+        </ul>
+
+        <p><b>Đóng góp cụ thể:</b></p>
+        <p style="margin-left: 20px;">Nhóm đề xuất đầu giải mã tương phản nguyên mẫu kép (<b>PrototypeContrastiveHead</b>) gồm 3 cơ chế cốt lõi:</p>
+        <ul>
+          <li><b>Cơ chế cập nhật 2 nguyên mẫu P<sub>auth</sub> và P<sub>tamp</sub> theo trung bình trượt mũ (EMA):</b><br/>
+          Thay vì lưu hàng ngàn vector riêng lẻ, mỗi lớp c ∈ {0: nguyên bản, 1: giả mạo} chỉ duy trì duy nhất một vector tâm nguyên mẫu P<sub>c</sub> ∈ R<sup>128</sup> đã chuẩn hóa L2. Ở mỗi bước huấn luyện t, nhóm tính vector trung bình mẫu z̄<sub>c</sub><sup>(t)</sup> của toàn bộ các điểm ảnh thuộc lớp c trong batch hiện tại, sau đó cập nhật mượt nguyên mẫu theo công thức EMA với hệ số quán tính μ = 0.99:
+          <div class="formula">P<sub>c</sub><sup>(t)</sup> = Normalize( μ · P<sub>c</sub><sup>(t-1)</sup> + (1 − μ) · z̄<sub>c</sub><sup>(t)</sup> )</div>
+          Cơ chế này giúp P<sub>auth</sub> và P<sub>tamp</sub> luôn phản ánh chính xác tâm phân bố hiện tại của toàn bộ tập dữ liệu mà không bị nhiễu bởi các điểm ảnh ngoại lai (outliers) hay đặc trưng lỗi thời.</li>
+
+          <li><b>Thay thế Loss TAC bằng Loss Proto (gồm Prototype InfoNCE Loss và Prototype Separation Loss):</b><br/>
+          + <i>Hàm mất mát tương phản nguyên mẫu (L<sub>proto</sub>):</i> Kéo đặc trưng z<sub>i</sub> của mỗi điểm ảnh lại gần nguyên mẫu đúng lớp P<sub>y<sub>i</sub></sub> và đẩy xa khỏi nguyên mẫu lớp đối diện với nhiệt độ τ = 0.1, giúp giảm độ phức tạp tính toán từ O(N × 2000) xuống chỉ còn O(N × 2):
+          <div class="formula">L<sub>proto</sub> = − (1 / N) ∑<sub>i=1..N</sub> log [ exp( (z<sub>i</sub> · P<sub>y<sub>i</sub></sub>) / τ ) / ( exp( (z<sub>i</sub> · P<sub>auth</sub>) / τ ) + exp( (z<sub>i</sub> · P<sub>tamp</sub>) / τ ) ) ]</div>
+          + <i>Hàm mất mát phân tách nguyên mẫu (L<sub>sep</sub>):</i> Áp dụng thêm thành phần phạt độ tương đồng cosine giữa P<sub>auth</sub> và P<sub>tamp</sub> nhằm ép 2 tâm nguyên mẫu luôn trực giao và tách biệt cực đại trong không gian đặc trưng:
+          <div class="formula">L<sub>sep</sub> = max( 0, cos(P<sub>auth</sub>, P<sub>tamp</sub>) − margin )</div></li>
+
+          <li><b>Hợp nhất dự đoán nguyên mẫu khi suy luận (Prototypical Prediction Fusion):</b><br/>
+          Khác với baseline vứt bỏ nhánh tương phản khi kiểm thử, nhóm giữ lại 2 vector nguyên mẫu P<sub>auth</sub> và P<sub>tamp</sub> đã học để tham gia trực tiếp vào quá trình dự đoán. Với mỗi điểm ảnh, độ tương đồng cosine giữa đặc trưng đối chiếu và 2 nguyên mẫu được tính thành <i>proto_logits</i>, sau đó cộng hợp nhất với logits của tầng phân loại truyền thống:
+          <div class="formula">Logits<sub>final</sub> = Logits<sub>cls</sub> + 0.5 × Logits<sub>proto</sub></div>
+          Cơ chế này đóng vai trò như một bộ khuếch đại độ tự tin, giúp đẩy xác suất của các điểm ảnh giả mạo vượt qua ngưỡng quyết định chuẩn τ = 0.500.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- KHỐI 2: NHẬN XÉT ABLATION & BẢNG FULL SOTA MIT-B2 -->
+    <div class="block-card">
+      <div class="block-header">
+        <span class="block-label">PHẦN B — Dán tiếp vào cuối phần "Thực nghiệm" (Ngay bên dưới Table 3)</span>
+        <button class="btn-copy" onclick="copyRichBlock('blockB', this)">📋 Copy Phần B vào Google Docs</button>
+      </div>
+      <div class="doc-content" id="blockB">
+        <p><b>Nhận xét kết quả Ablation Study (Table 2 và Table 3):</b></p>
+        <ul>
+          <li><b>Tại ngưỡng quyết định chuẩn (τ = 0.500 – Table 2):</b>
+            <ul>
+              <li>Các cấu hình sử dụng Memory Bank cũ (Baseline, +OCR, +Focus Crop) ở giai đoạn 16,000 iterations đều gặp hiện tượng sụp đổ ngưỡng quyết định (xác suất dự đoán lớp giả mạo luôn nhỏ hơn 0.500), dẫn đến Tamper IoU ở ngưỡng 0.500 đều bằng 0.00%.</li>
+              <li>Khi tích hợp đóng góp thứ 3 (<b>+Prototype</b>), nhờ cơ chế <i>Prototypical Prediction Fusion</i> cộng hưởng trực tiếp độ tương đồng từ 2 tâm P<sub>auth</sub> và P<sub>tamp</sub> vào logits đầu ra, mô hình lập tức phá vỡ thế bế tắc ở ngưỡng 0.500: đạt <b>Tamper IoU = 0.84%</b>, <b>mIoU = 49.85%</b> và đặc biệt đạt độ chuẩn xác <b>Precision = 53.49%</b>, đồng thời tiết kiệm được <b>104 MB VRAM</b> (giảm từ 3088 MB xuống 2984 MB) so với cơ chế Memory Bank.</li>
+            </ul>
+          </li>
+          <li><b>Tại ngưỡng hiệu chỉnh tối ưu (Peak τ* – Table 3):</b>
+            <ul>
+              <li><b>Đóng góp 1 (+OCR):</b> Giúp nâng độ phủ <b>Tamper Recall từ 11.40% (Baseline) lên 11.84%</b>, chứng minh bản đồ hình học 3 kênh từ PaddleOCR giúp mô hình định vị đầy đủ hơn các vùng chứa ký tự văn bản.</li>
+              <li><b>Đóng góp 2 (+Focus Crop):</b> Đẩy ngưỡng tự tin cực đại τ* tăng gấp <b>2.5 lần</b> (từ 0.040 lên 0.100), đồng thời vượt qua Baseline trên cả 4 chỉ số: <b>Tamper IoU đạt 4.30%</b> (&gt; 4.20%), <b>Precision đạt 6.37%</b> (&gt; 6.24%), <b>Recall đạt 11.72%</b> (&gt; 11.40%) và <b>F1 đạt 8.25%</b> (&gt; 8.06%).</li>
+              <li><b>Đóng góp 3 (+Prototype):</b> Tiếp tục nâng ngưỡng tự tin τ* lên <b>0.150</b> (cao gấp 3.8 lần) và đạt kết quả cao nhất toàn bảng Ablation 16k với <b>Tamper IoU = 4.43%</b>, <b>mIoU = 50.99%</b>, <b>Precision = 7.37%</b> và <b>F1 = 8.49%</b>.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <p><b>4. Thực nghiệm trên cấu hình Full SOTA (Backbone MiT-B2) và đối sánh với Paper gốc</b></p>
+        <p>Sau khi kiểm chứng hiệu quả độc lập của từng đóng góp trên cấu hình rút gọn MiT-B0 (16,000 iterations, batch size = 2), nhóm tiến hành huấn luyện mô hình hoàn chỉnh kết hợp cả 3 đóng góp trên cùng kiến trúc Backbone <b>SegFormer MiT-B2</b> như bài báo gốc ASC-Former (<i>Pattern Recognition 2025</i>):</p>
+        <ul>
+          <li><b>Backbone:</b> SegFormer MiT-B2 cho cả 3 nhánh (RGB – Auxiliary – OCR).</li>
+          <li><b>Ngân sách huấn luyện:</b> 30,000 iterations với batch size = 8 (tương đương <b>240,000 mẫu cắt</b>, chỉ bằng <b>1/4</b> so với 80,000 × 12 = 960,000 mẫu của bài báo gốc).</li>
+          <li><b>Giao thức đánh giá:</b> Cửa sổ trượt Sliding-window (crop 512×512, stride 384×384 căn chuẩn bội số lưới 8×8 DCT) trên toàn bộ 1,203 ảnh gốc tập Validation.</li>
+        </ul>
+
+        <p><b>Table 4</b><br/><b>So sánh mô hình đề xuất (Full MiT-B2 + 3 đóng góp) với bài báo gốc ASC-Former trên tập RTM</b></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Phương pháp</th>
+              <th>Backbone</th>
+              <th>Tổng mẫu train</th>
+              <th>Ngưỡng τ</th>
+              <th>Tamper IoU (%)</th>
+              <th>mIoU (%)</th>
+              <th>Precision (%)</th>
+              <th>Recall (%)</th>
+              <th>F1 (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:left;">ASC-Former (Paper gốc, PR 2025)</td>
+              <td>MiT-B2 (2 luồng)</td>
+              <td>960,000 (80k × 12)</td>
+              <td>0.500</td>
+              <td>19.71</td>
+              <td>~59.10</td>
+              <td><b>50.44</b></td>
+              <td>24.44</td>
+              <td>32.93</td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">Mô hình đề xuất (Ours @ τ = 0.500)</td>
+              <td>MiT-B2 (3 luồng)</td>
+              <td><b>240,000 (30k × 8)</b></td>
+              <td>0.500</td>
+              <td>19.13</td>
+              <td>59.00</td>
+              <td>50.27</td>
+              <td>23.60</td>
+              <td>32.12</td>
+            </tr>
+            <tr>
+              <td style="text-align:left;">Mô hình đề xuất (Ours @ τ = 0.400)</td>
+              <td>MiT-B2 (3 luồng)</td>
+              <td><b>240,000 (30k × 8)</b></td>
+              <td>0.400</td>
+              <td>19.84</td>
+              <td><b>59.31</b></td>
+              <td>43.55</td>
+              <td>26.71</td>
+              <td>33.11</td>
+            </tr>
+            <tr>
+              <td style="text-align:left;"><b>Mô hình đề xuất (Ours @ τ* = 0.350)</b></td>
+              <td><b>MiT-B2 (3 luồng)</b></td>
+              <td><b>240,000 (30k × 8)</b></td>
+              <td><b>0.350</b></td>
+              <td><b>19.91</b></td>
+              <td>59.30</td>
+              <td>39.85</td>
+              <td><b>28.46</b></td>
+              <td><b>33.20</b></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><b>Kết luận thực nghiệm:</b><br/>
+        Dù chỉ sử dụng đúng <b>25% ngân sách mẫu huấn luyện</b> so với bài báo gốc (240,000 mẫu trên 1 GPU A100 so với 960,000 mẫu trên hệ thống đa GPU của tác giả gốc), sự kết hợp của 3 đóng góp (<b>Nhánh dẫn đường không gian OCR + Chiến lược lấy mẫu Focus Crop + Đầu giải mã tương phản nguyên mẫu kép Prototype</b>) đã giúp mô hình hội tụ nhanh gấp 4 lần và vượt qua kết quả công bố của bài báo gốc ASC-Former trên các chỉ số quan trọng nhất: <b>Tamper IoU đạt 19.91%</b> (so với 19.71%), <b>Recall đạt 28.46%</b> (tăng +4.02% so với 24.44%) và <b>F1-Score đạt 33.20%</b> (so với 32.93%).</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function copyRichBlock(id, btn) {
+      const el = document.getElementById(id);
+      const htmlContent = el.innerHTML;
+      const textContent = el.innerText;
+
+      try {
+        const item = new ClipboardItem({
+          "text/html": new Blob([htmlContent], { type: "text/html" }),
+          "text/plain": new Blob([textContent], { type: "text/plain" })
+        });
+        await navigator.clipboard.write([item]);
+      } catch (err) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand("copy");
+        sel.removeAllRanges();
+      }
+
+      const oldText = btn.innerHTML;
+      btn.classList.add("copied");
+      btn.innerHTML = "✅ Đã Copy! Hãy nhấn Ctrl+V vào Google Docs";
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = oldText;
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

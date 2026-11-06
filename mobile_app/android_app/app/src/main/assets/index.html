@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes" />
+  <title>RTM Text Forensic — Phát hiện Giả mạo Văn bản</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --danger: #f43f5e;
+      --danger-bg: rgba(244, 63, 94, 0.14);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.14);
+      --accent: #6366f1;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 32px;
+    }
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #162038 0%, #0f172a 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 3px 10px rgba(59, 130, 246, 0.4);
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .chip-offline {
+      font-size: 11px;
+      font-weight: 600;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      padding: 4px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* Action Buttons */
+    .action-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+      color: #fff;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn-camera {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    .btn-upload {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+    .sample-bar {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+    }
+    .sample-label {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .sample-Pills {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .pill {
+      background: #0f172a;
+      border: 1px solid #26334d;
+      color: #cbd5e1;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 4px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .pill:active, .pill.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    /* Status bar */
+    .status-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: rgba(19, 27, 46, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #3b82f6;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+    .status-strip.loading .spinner {
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Verdict & Confidence Banner */
+    .verdict-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .verdict-card.tampered {
+      border-color: rgba(244, 63, 94, 0.5);
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.10) 0%, #131b2e 100%);
+    }
+    .verdict-card.authentic {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.10) 0%, #131b2e 100%);
+    }
+    .verdict-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .verdict-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 10px;
+    }
+    .tampered .verdict-badge {
+      background: var(--danger-bg);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+    .authentic .verdict-badge {
+      background: var(--success-bg);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .conf-box {
+      text-align: right;
+    }
+    .conf-value {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .tampered .conf-value { color: #fb7185; }
+    .authentic .conf-value { color: #34d399; }
+    .conf-caption {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: #0b0f19;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 8px 0 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .tampered .progress-fill {
+      background: linear-gradient(90deg, #f59e0b, #f43f5e);
+    }
+    .authentic .progress-fill {
+      background: linear-gradient(90deg, #059669, #10b981);
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Visual Display Card (ONLY Tab 1 & Tab 2 as requested) */
+    .viewer-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 12px;
+      display: none;
+    }
+    .tabs-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: #0b0f19;
+      padding: 5px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      padding: 10px 8px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #070a12;
+      border: 1px solid #1e293b;
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .canvas-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .compare-hint {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding: 6px 4px 2px;
+    }
+    .btn-hold-orig {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-hold-orig:active {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    /* Legend for Tab 2 Heatmap */
+    .heatmap-legend {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      background: #0b0f19;
+      border-radius: 10px;
+    }
+    .legend-bar {
+      height: 10px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #0f1982 0%, #0fc8ff 25%, #19eb32 50%, #fae614 75%, #ff1428 100%);
+      margin-bottom: 6px;
+    }
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Region List for Tab 1 */
+    .regions-panel {
+      margin-top: 12px;
+    }
+    .regions-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+    .region-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b0f19;
+      border: 1px solid #1e293b;
+      padding: 9px 12px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+    .region-tag {
+      font-weight: 700;
+      color: #fb7185;
+    }
+    .region-coords {
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+    .region-conf {
+      font-weight: 700;
+      color: #fff;
+      background: rgba(244, 63, 94, 0.22);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 38px 20px;
+      background: var(--card);
+      border: 1px dashed #334155;
+      border-radius: 16px;
+      color: var(--muted);
+    }
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div>
+          <div class="brand-title">RTM Text Forensic</div>
+          <div class="brand-sub">MiT-B0 SOTA Mobile • Turbo v2.4 (HW Accel)</div>
+        </div>
+      </div>
+      <div class="chip-offline" style="background:rgba(16,185,129,0.18); border-color:rgba(16,185,129,0.45); color:#34d399; font-weight:700;">⚡ v2.4 Turbo</div>
+    </div>
+
+    <!-- Action Controls -->
+    <div class="action-card">
+      <div class="btn-row">
+        <button class="btn btn-camera" onclick="handleCamera()">
+          <span>📸</span> Chụp ảnh
+        </button>
+        <button class="btn btn-upload" onclick="handleUpload()">
+          <span>🖼️</span> Tải ảnh / Màn hình
+        </button>
+      </div>
+      <input type="file" id="webFileInput" accept="image/*" capture="environment" style="display:none" onchange="onWebFileSelected(event)" />
+      <input type="file" id="webGalleryInput" accept="image/*" style="display:none" onchange="onWebFileSelected(event)" />
+
+      <div class="sample-bar">
+        <span class="sample-label">Hoặc chạm để kiểm thử nhanh ảnh tài liệu mẫu có sẵn:</span>
+        <div class="sample-Pills">
+          <div class="pill" id="pill-1" onclick="runSample('sample_tamper_1.jpg', this)">Mẫu sửa #1</div>
+          <div class="pill" id="pill-2" onclick="runSample('sample_tamper_2.jpg', this)">Mẫu sửa #2</div>
+          <div class="pill" id="pill-3" onclick="runSample('sample_tamper_3.jpg', this)">Mẫu sửa #3</div>
+          <div class="pill" id="pill-4" onclick="runSample('sample_authentic.jpg', this)">Ảnh gốc #4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Strip -->
+    <div class="status-strip" id="statusStrip">
+      <div class="spinner"></div>
+      <span id="statusText">Sẵn sàng kiểm tra ảnh trên thiết bị (Offline 100%)</span>
+    </div>
+
+    <!-- Placeholder before first image -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🔍</div>
+      <div style="font-weight:600; color:#e2e8f0; margin-bottom:4px;">Chưa có ảnh nào được chọn</div>
+      <div style="font-size:12.5px;">Hãy chụp ảnh, tải ảnh chụp màn hình hoặc chọn 1 mẫu thử phía trên để phát hiện vùng văn bản bị chỉnh sửa.</div>
+    </div>
+
+    <!-- Verdict & Confidence Banner -->
+    <div class="verdict-card" id="verdictCard">
+      <div class="verdict-top">
+        <div class="verdict-badge" id="verdictBadge">⚠️ PHÁT HIỆN GIẢ MẠO</div>
+        <div class="conf-box">
+          <div class="conf-value" id="confValue">0.0%</div>
+          <div class="conf-caption">Độ tự tin của Model</div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="confBar"></div>
+      </div>
+      <div class="meta-row">
+        <span id="metaRegions">Phát hiện: 0 vùng nghi vấn</span>
+        <span id="metaTime">Thời gian: -- ms</span>
+      </div>
+    </div>
+
+    <!-- Visual Display Card (Strictly Tab 1 & Tab 2) -->
+    <div class="viewer-card" id="viewerCard">
+      <div class="tabs-header">
+        <button class="tab-btn active" id="tabBtn1" onclick="switchTab(1)">
+          🎯 Tab 1: Khoanh vùng
+        </button>
+        <button class="tab-btn" id="tabBtn2" onclick="switchTab(2)">
+          🔥 Tab 2: Bản đồ nhiệt
+        </button>
+      </div>
+
+      <div class="canvas-wrap">
+        <img id="resultImg" src="" alt="Forensic Result" />
+      </div>
+
+      <div class="compare-hint">
+        <span style="font-size:11.5px; color:var(--muted);" id="imgDimInfo">Kích thước: -- × --</span>
+        <button class="btn-hold-orig"
+          onmousedown="showOriginal(true)" onmouseup="showOriginal(false)" onmouseleave="showOriginal(false)"
+          ontouchstart="showOriginal(true); event.preventDefault();" ontouchend="showOriginal(false)">
+          👁️ Nhấn giữ xem Ảnh gốc
+        </button>
+      </div>
+
+      <!-- Tab 2 Heatmap Colorbar -->
+      <div class="heatmap-legend" id="heatmapLegend">
+        <div class="legend-bar"></div>
+        <div class="legend-labels">
+          <span>0% (Nguyên bản)</span>
+          <span>35% (Ngưỡng τ*)</span>
+          <span>70%</span>
+          <span>100% (Giả mạo)</span>
+        </div>
+      </div>
+
+      <!-- Tab 1 Detected Regions List -->
+      <div class="regions-panel" id="regionsPanel">
+        <div class="regions-title" id="regionsTitle">Chi tiết các vùng khoanh giả mạo:</div>
+        <div id="regionsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentResult = null;
+    let activeTab = 1;
+
+    function isAndroidNative() {
+      return typeof window.AndroidBridge !== "undefined";
+    }
+
+    function setLoading(isLoading, msg) {
+      const strip = document.getElementById("statusStrip");
+      const txt = document.getElementById("statusText");
+      if (isLoading) strip.classList.add("loading");
+      else strip.classList.remove("loading");
+      if (msg) txt.textContent = msg;
+    }
+
+    window.onEngineStatus = function(msg) {
+      const busy = msg.startsWith("Đang");
+      setLoading(busy, msg);
+    };
+
+    window.onForensicError = function(msg) {
+      setLoading(false, "❌ " + msg);
+    };
+
+    function handleCamera() {
+      if (isAndroidNative()) {
+        window.AndroidBridge.captureCamera();
+      } else {
+        document.getElementById("webFileInput").click();
+      }
+    }
+
+    function handleUpload() {
+      if (isAndroidNative()) {
+        window.AndroidBridge.pickGallery();
+      } else {
+        document.getElementById("webGalleryInput").click();
+      }
+    }
+
+    function runSample(sampleName, el) {
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      if (el) el.classList.add("active");
+      setLoading(true, "Đang phân tích mẫu " + sampleName + "...");
+      if (isAndroidNative()) {
+        window.AndroidBridge.runSample(sampleName);
+      } else {
+        fetch("/api/sample?name=" + encodeURIComponent(sampleName))
+          .then(r => r.json())
+          .then(data => window.onForensicResult(data))
+          .catch(err => window.onForensicError(err.message));
+      }
+    }
+
+    function onWebFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      setLoading(true, "Đang phân tích ảnh " + file.name + "...");
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, image_b64: evt.target.result })
+        })
+          .then(r => r.json())
+          .then(data => window.onForensicResult(data))
+          .catch(err => window.onForensicError(err.message));
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.onForensicResult = function(res) {
+      setLoading(false, "Hoàn tất phân tích (" + res.inference_ms + " ms)");
+      currentResult = res;
+      document.getElementById("emptyState").style.display = "none";
+
+      const vCard = document.getElementById("verdictCard");
+      vCard.style.display = "block";
+      vCard.className = "verdict-card " + (res.is_tampered ? "tampered" : "authentic");
+
+      document.getElementById("verdictBadge").textContent =
+        res.is_tampered ? "⚠️ PHÁT HIỆN GIẢ MẠO" : "✅ ẢNH NGUYÊN BẢN";
+      document.getElementById("confValue").textContent = res.confidence.toFixed(1) + "%";
+      document.getElementById("confBar").style.width = Math.min(100, res.confidence) + "%";
+
+      const numBoxes = (res.boxes && res.boxes.length) ? res.boxes.length : 0;
+      document.getElementById("metaRegions").textContent =
+        res.is_tampered
+          ? ("Phát hiện: " + numBoxes + " vùng giả mạo (" + res.tamper_pixels + " px)")
+          : "Không phát hiện vùng văn bản bị can thiệp";
+      document.getElementById("metaTime").textContent = "Xử lý: " + res.inference_ms + " ms";
+
+      document.getElementById("viewerCard").style.display = "block";
+      document.getElementById("imgDimInfo").textContent =
+        "Kích thước: " + res.width + " × " + res.height + " px";
+
+      // Populate region list
+      const listEl = document.getElementById("regionsList");
+      listEl.innerHTML = "";
+      if (numBoxes > 0) {
+        document.getElementById("regionsTitle").textContent =
+          "Chi tiết vùng khoanh giả mạo (" + numBoxes + " vùng):";
+        res.boxes.forEach(b => {
+          const row = document.createElement("div");
+          row.className = "region-item";
+          row.innerHTML =
+            '<div><span class="region-tag">Vùng #' + b.id + '</span> ' +
+            '<span class="region-coords">[' + b.x1 + ', ' + b.y1 + ' → ' + b.x2 + ', ' + b.y2 + '] (' + b.area + ' px)</span></div>' +
+            '<div class="region-conf">Độ tự tin: ' + b.conf.toFixed(1) + '%</div>';
+          listEl.appendChild(row);
+        });
+      } else {
+        document.getElementById("regionsTitle").textContent =
+          "Không có vùng giả mạo nào vượt ngưỡng τ* = 35%.";
+      }
+
+      switchTab(activeTab);
+    };
+
+    function switchTab(tabIdx) {
+      activeTab = tabIdx;
+      document.getElementById("tabBtn1").classList.toggle("active", tabIdx === 1);
+      document.getElementById("tabBtn2").classList.toggle("active", tabIdx === 2);
+
+      document.getElementById("regionsPanel").style.display = (tabIdx === 1) ? "block" : "none";
+      document.getElementById("heatmapLegend").style.display = (tabIdx === 2) ? "block" : "none";
+
+      if (!currentResult) return;
+      const imgEl = document.getElementById("resultImg");
+      imgEl.src = (tabIdx === 1) ? currentResult.bbox_b64 : currentResult.heatmap_b64;
+    }
+
+    function showOriginal(showOrig) {
+      if (!currentResult) return;
+      const imgEl = document.getElementById("resultImg");
+      if (showOrig) {
+        imgEl.src = currentResult.orig_b64;
+      } else {
+        imgEl.src = (activeTab === 1) ? currentResult.bbox_b64 : currentResult.heatmap_b64;
+      }
+    }
+  </script>
+</body>
+</html>

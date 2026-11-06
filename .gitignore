@@ -165,4 +165,12 @@ artifacts/
 *.pth
 work_dirs/
 *.pdf
-mobile_app/
+
+# Mobile App exclusions (large binaries, SDKs, builds, models)
+mobile_app/.build_tools/
+mobile_app/models/
+mobile_app/android_app/.gradle/
+mobile_app/android_app/**/build/
+mobile_app/*.apk
+mobile_app/**/*.onnx
+mobile_app/**/__pycache__/
