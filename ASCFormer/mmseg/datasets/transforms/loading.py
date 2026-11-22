@@ -672,7 +672,7 @@ class LoadOCRSpatialFromFile(BaseTransform):
     """
 
     def __init__(self,
-                 ocr_dir: str = 'ASCFormer/data/ttd/RealTextMan/ocr_spatial',
+                 ocr_dir: str = 'data/ttd/RealTextMan/ocr_spatial',
                  key: str = 'ocr',
                  to_float32: bool = True):
         self.ocr_dir = ocr_dir
@@ -683,14 +683,20 @@ class LoadOCRSpatialFromFile(BaseTransform):
         img_path = results['img_path']
         base_name = osp.splitext(osp.basename(img_path))[0]
         ocr_path = osp.join(self.ocr_dir, f'{base_name}.png')
+        if not osp.exists(ocr_path):
+            # Auto-resolve sibling ocr_spatial/ next to JPEGImages/ regardless of cwd
+            auto_path = osp.join(osp.dirname(osp.dirname(img_path)), 'ocr_spatial', f'{base_name}.png')
+            if osp.exists(auto_path):
+                ocr_path = auto_path
 
+        h, w = results['img'].shape[:2]
         if osp.exists(ocr_path):
             ocr_map = cv2.imread(ocr_path, cv2.IMREAD_COLOR)
             if ocr_map is None:
-                h, w = results['img'].shape[:2]
                 ocr_map = np.zeros((h, w, 3), dtype=np.uint8)
+            elif ocr_map.shape[:2] != (h, w):
+                ocr_map = cv2.resize(ocr_map, (w, h), interpolation=cv2.INTER_NEAREST)
         else:
-            h, w = results['img'].shape[:2]
             ocr_map = np.zeros((h, w, 3), dtype=np.uint8)
 
         # Synchronize with earlier flip if already applied

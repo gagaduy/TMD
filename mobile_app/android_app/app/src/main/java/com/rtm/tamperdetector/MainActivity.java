@@ -316,13 +316,11 @@ public class MainActivity extends Activity {
         FloatBuffer imgBuf = FloatBuffer.allocate(3 * 512 * 512);
         FloatBuffer elaBuf = FloatBuffer.allocate(3 * 512 * 512);
 
-        boolean strongForgeryFound = false;
-        int tilesSinceStrong = 0;
-
+        // Full-Scan: scan 100% of text-bearing tiles without Early Exit to catch all tampered regions
         for (int tIdx = 0; tIdx < windows.size(); tIdx++) {
             int y0 = windows.get(tIdx)[0];
             int x0 = windows.get(tIdx)[1];
-            sendStatus("Đang quét thông minh (ưu tiên vùng chữ): Ô " + (tIdx + 1) + "/" + windows.size() + "...");
+            sendStatus("Đang quét toàn trang (Full-Scan): Ô " + (tIdx + 1) + "/" + windows.size() + "...");
 
             imgBuf.clear();
             elaBuf.clear();
@@ -350,9 +348,6 @@ public class MainActivity extends Activity {
                 }
             }
 
-            float tileMaxP = 0f;
-            int tileTamperPx = 0;
-
             try (OnnxTensor imgTensor = OnnxTensor.createTensor(ortEnv, imgBuf, tensorShape);
                  OnnxTensor elaTensor = OnnxTensor.createTensor(ortEnv, elaBuf, tensorShape)) {
                 Map<String, OnnxTensor> feeds = new HashMap<>();
@@ -369,19 +364,9 @@ public class MainActivity extends Activity {
                             if (p > probFull[rowOff + dx]) {
                                 probFull[rowOff + dx] = p;
                             }
-                            if (p >= TAMPER_THRESHOLD) {
-                                tileTamperPx++;
-                                if (p > tileMaxP) tileMaxP = p;
-                            }
                         }
                     }
                 }
-            }
-
-            if (tileMaxP >= TAMPER_THRESHOLD && tileTamperPx >= 48) {
-                strongForgeryFound = true;
-                sendStatus("Đã phát hiện vùng giả mạo (" + Math.round(tileMaxP * 100) + "%), dừng quét sớm!");
-                break;
             }
         }
 
@@ -561,10 +546,9 @@ public class MainActivity extends Activity {
                 if (wave < b.size()) {
                     scheduled.add(new int[]{b.get(wave).y0, b.get(wave).x0});
                     added = true;
-                    if (scheduled.size() >= 18) break;
                 }
             }
-            if (!added || scheduled.size() >= 18) break;
+            if (!added) break;
         }
         return scheduled;
     }

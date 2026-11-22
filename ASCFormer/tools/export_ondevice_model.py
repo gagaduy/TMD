@@ -157,7 +157,9 @@ class OnDeviceRTMModel(nn.Module):
         self.ela_proc = base_model.preprocessor_sec[1]
         self.srm_proc = base_model.preprocessor_sec[2]
 
-        self.ocr_extractor = OnGraphOCRSpatial()
+        self.has_ocr = hasattr(base_model.backbone, 'ocr_branch')
+        if self.has_ocr:
+            self.ocr_extractor = OnGraphOCRSpatial()
         self.backbone = base_model.backbone
         self.decode_head = base_model.decode_head
 
@@ -178,10 +180,10 @@ class OnDeviceRTMModel(nn.Module):
         f_ela = self.ela_proc(ela_bgr)
         f_srm = self.srm_proc(norm_rgb)
 
-        # 4. On-graph OCR spatial stream
-        ocr_map = self.ocr_extractor(y_chan)
+        # 4. On-graph OCR spatial stream (only for 3-stream TriCMNeXt; skipped for 2-stream B0-Lite)
+        ocr_map = self.ocr_extractor(y_chan) if self.has_ocr else None
 
-        # 5. Trace-safe Tri-Stream Backbone + Dual-Prototype Decode Head
+        # 5. Trace-safe Backbone + Prototype Decode Head
         feats = self._forward_backbone(norm_rgb, [f_dct, f_ela, f_srm], ocr_map)
         seg_logits = self._forward_decode_head(feats)
         seg_logits_up = F.interpolate(
@@ -230,18 +232,22 @@ class OnDeviceRTMModel(nn.Module):
             # Stage 1 Fusion: RGB + Forensic
             x_fused_ra = bb.FFMs[i](x_cam, x_f)
 
-            # 3. OCR spatial stream
-            layer_ocr = bb.ocr_branch.layers[i]
-            x_ocr_t, hw_ocr = layer_ocr[0](x_ocr)
-            for block in layer_ocr[1]:
-                x_ocr_t = block(x_ocr_t, hw_ocr)
-            x_ocr_t = layer_ocr[2](x_ocr_t)
-            x_ocr_feat = nlc_to_nchw(x_ocr_t, hw_ocr)
+            if self.has_ocr:
+                # 3. OCR spatial stream (3-stream TriCMNeXt)
+                layer_ocr = bb.ocr_branch.layers[i]
+                x_ocr_t, hw_ocr = layer_ocr[0](x_ocr)
+                for block in layer_ocr[1]:
+                    x_ocr_t = block(x_ocr_t, hw_ocr)
+                x_ocr_t = layer_ocr[2](x_ocr_t)
+                x_ocr_feat = nlc_to_nchw(x_ocr_t, hw_ocr)
 
-            # Stage 2 Fusion: [RGB+Forensic] + OCR
-            x_fused_final = bb.FFM_ocrs[i](x_fused_ra, x_ocr_feat)
-            x_ocr = x_ocr_feat
-            outs.append(x_fused_final)
+                # Stage 2 Fusion: [RGB+Forensic] + OCR
+                x_fused_final = bb.FFM_ocrs[i](x_fused_ra, x_ocr_feat)
+                x_ocr = x_ocr_feat
+                outs.append(x_fused_final)
+            else:
+                # 2-stream AsymCMNeXtV2 (MiT-B0-Lite): direct RGB+Forensic fusion output
+                outs.append(x_fused_ra)
 
             x_extra = [x_.reshape(B, H, W, -1).permute(0, 3, 1, 2) + x_f for x_ in x_extra]
 
@@ -285,6 +291,10 @@ def main():
     print(f'[1/4] Loading config & checkpoint: {args.checkpoint}...')
     cfg = Config.fromfile(args.config)
     replace_syncbn(cfg.model)
+    if 'teacher_ckpt_path' in cfg.model:
+        cfg.model.teacher_ckpt_path = None
+    if 'teacher_cfg_path' in cfg.model:
+        cfg.model.teacher_cfg_path = None
     if hasattr(cfg.model.backbone, 'backbone_main'):
         cfg.model.backbone.backbone_main.pretrained = None
     if hasattr(cfg.model.backbone, 'backbone_extra'):

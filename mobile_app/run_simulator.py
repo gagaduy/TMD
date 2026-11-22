@@ -83,8 +83,7 @@ class ForensicEngine:
             if not added:
                 break
 
-        max_w = min(18, len(scheduled))
-        return scheduled[:max_w]
+        return scheduled
 
     def extract_boxes(self, prob: np.ndarray):
         h, w = prob.shape[:2]
@@ -172,20 +171,12 @@ class ForensicEngine:
         windows = self.build_smart_windows(work_bgr, wh, ww)
         prob_full = np.zeros((wh, ww), dtype=np.float32)
 
-        strong_found = False
-        tiles_after_strong = 0
-
+        # Full-Scan: process 100% of text-bearing tiles without Early Exit
         for y0, x0 in windows:
             ci = work_bgr[y0:y0 + 512, x0:x0 + 512].transpose(2, 0, 1)[None].astype(np.float32)
             ce = ela_bgr[y0:y0 + 512, x0:x0 + 512].transpose(2, 0, 1)[None].astype(np.float32)
             p = self.sess.run(['prob_tamper'], {'img_bgr': ci, 'ela_bgr': ce})[0][0]
             prob_full[y0:y0 + 512, x0:x0 + 512] = np.maximum(prob_full[y0:y0 + 512, x0:x0 + 512], p)
-
-            tile_tamper_px = int((p >= TAMPER_THRESHOLD).sum())
-            tile_max_p = float(p.max())
-            if tile_max_p >= TAMPER_THRESHOLD and tile_tamper_px >= 48:
-                # Early exit: Tamper detected with high confidence, finish immediately
-                break
         prob_orig = prob_full[:oh, :ow]
         boxes = self.extract_boxes(prob_orig)
         max_prob = float(prob_orig.max())

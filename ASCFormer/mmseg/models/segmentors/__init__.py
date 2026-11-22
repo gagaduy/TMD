@@ -5,9 +5,10 @@ from .encoder_decoder import EncoderDecoder
 from .seg_tta import SegTTAModel
 
 from .my_model_full import MyModelFull
+from .distill_my_model_full import MyModelFullDistill
 
 
 __all__ = [
     'BaseSegmentor', 'EncoderDecoder', 'CascadeEncoderDecoder', 'SegTTAModel',
-    'MyModelFull'
+    'MyModelFull', 'MyModelFullDistill'
 ]

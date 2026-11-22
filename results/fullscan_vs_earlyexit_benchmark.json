@@ -1,0 +1,844 @@
+{
+  "dataset_meta": [
+    {
+      "name": "edit_0206",
+      "category": "edit",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 6,
+      "w": 700,
+      "h": 990
+    },
+    {
+      "name": "edit_0213",
+      "category": "edit",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 6,
+      "w": 827,
+      "h": 1170
+    },
+    {
+      "name": "edit_0202",
+      "category": "edit",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 773,
+      "h": 773
+    },
+    {
+      "name": "cpmv_2658",
+      "category": "cpmv",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 3,
+      "gt_hit_tiles": 6,
+      "w": 740,
+      "h": 973
+    },
+    {
+      "name": "cpmv_2815",
+      "category": "cpmv",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 620,
+      "h": 877
+    },
+    {
+      "name": "cpmv_2910",
+      "category": "cpmv",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 3,
+      "gt_hit_tiles": 6,
+      "w": 960,
+      "h": 720
+    },
+    {
+      "name": "splice_0496",
+      "category": "splice",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 4,
+      "w": 616,
+      "h": 1224
+    },
+    {
+      "name": "splice_0588",
+      "category": "splice",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 3,
+      "gt_hit_tiles": 4,
+      "w": 739,
+      "h": 827
+    },
+    {
+      "name": "splice_0602",
+      "category": "splice",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 3,
+      "gt_hit_tiles": 4,
+      "w": 696,
+      "h": 992
+    },
+    {
+      "name": "insert_0297",
+      "category": "insert",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 793,
+      "h": 1121
+    },
+    {
+      "name": "insert_0288",
+      "category": "insert",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 540,
+      "h": 720
+    },
+    {
+      "name": "insert_0324",
+      "category": "insert",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 4,
+      "w": 634,
+      "h": 577
+    },
+    {
+      "name": "inpaint_0720",
+      "category": "inpaint",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 754,
+      "h": 1000
+    },
+    {
+      "name": "inpaint_0766",
+      "category": "inpaint",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 4,
+      "w": 754,
+      "h": 1000
+    },
+    {
+      "name": "inpaint_0686",
+      "category": "inpaint",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 606,
+      "h": 823
+    },
+    {
+      "name": "cover_0959",
+      "category": "cover",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 4,
+      "w": 960,
+      "h": 720
+    },
+    {
+      "name": "cover_0982",
+      "category": "cover",
+      "is_tampered": true,
+      "tiles": 6,
+      "gt_regions": 2,
+      "gt_hit_tiles": 4,
+      "w": 754,
+      "h": 1000
+    },
+    {
+      "name": "cover_0994",
+      "category": "cover",
+      "is_tampered": true,
+      "tiles": 4,
+      "gt_regions": 2,
+      "gt_hit_tiles": 2,
+      "w": 704,
+      "h": 817
+    },
+    {
+      "name": "good_1119",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 710,
+      "h": 1010
+    },
+    {
+      "name": "good_1282",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 888,
+      "h": 1105
+    },
+    {
+      "name": "good_1495",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 4,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 859,
+      "h": 610
+    },
+    {
+      "name": "good_1575",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 609,
+      "h": 1204
+    },
+    {
+      "name": "good_1152",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 4,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 627,
+      "h": 800
+    },
+    {
+      "name": "good_1451",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 775,
+      "h": 1095
+    },
+    {
+      "name": "good_1212",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 4,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 624,
+      "h": 750
+    },
+    {
+      "name": "good_1025",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 702,
+      "h": 1026
+    },
+    {
+      "name": "good_1512",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 695,
+      "h": 899
+    },
+    {
+      "name": "good_1030",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 888,
+      "h": 958
+    },
+    {
+      "name": "good_1020",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 6,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 842,
+      "h": 1261
+    },
+    {
+      "name": "good_1096",
+      "category": "good",
+      "is_tampered": false,
+      "tiles": 4,
+      "gt_regions": 0,
+      "gt_hit_tiles": 0,
+      "w": 627,
+      "h": 867
+    }
+  ],
+  "models": {
+    "MiT_B0_INT8": {
+      "threads": 8,
+      "avg_tile_ms": 1061.7,
+      "std_tile_ms": 28.5,
+      "full_scan": {
+        "avg_tiles": 5.2,
+        "avg_latency_ms": 5539.8,
+        "median_latency_ms": 6310.7,
+        "p95_latency_ms": 6504.1,
+        "by_tau": {
+          "0.2": {
+            "pixel": {
+              "tamper_iou": 2.29,
+              "bg_iou": 98.71,
+              "miou": 50.5,
+              "precision": 3.39,
+              "recall": 6.61,
+              "f1": 4.48,
+              "fnr": 93.39
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 2,
+              "missed_regions": 38,
+              "region_recall": 5.0,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 6,
+              "fp": 4,
+              "tn": 8,
+              "fn": 12,
+              "accuracy": 46.67,
+              "precision": 60.0,
+              "recall": 33.33,
+              "f1": 42.86,
+              "specificity": 66.67,
+              "fpr": 33.33,
+              "fnr": 66.67,
+              "roc_auc": 50.46
+            }
+          },
+          "0.3": {
+            "pixel": {
+              "tamper_iou": 2.23,
+              "bg_iou": 99.07,
+              "miou": 50.65,
+              "precision": 4.1,
+              "recall": 4.65,
+              "f1": 4.36,
+              "fnr": 95.35
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 5,
+              "fp": 2,
+              "tn": 10,
+              "fn": 13,
+              "accuracy": 50.0,
+              "precision": 71.43,
+              "recall": 27.78,
+              "f1": 40.0,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 72.22,
+              "roc_auc": 50.46
+            }
+          },
+          "0.35": {
+            "pixel": {
+              "tamper_iou": 1.92,
+              "bg_iou": 99.16,
+              "miou": 50.54,
+              "precision": 3.98,
+              "recall": 3.59,
+              "f1": 3.77,
+              "fnr": 96.41
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 4,
+              "fp": 2,
+              "tn": 10,
+              "fn": 14,
+              "accuracy": 46.67,
+              "precision": 66.67,
+              "recall": 22.22,
+              "f1": 33.33,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 77.78,
+              "roc_auc": 50.46
+            }
+          },
+          "0.5": {
+            "pixel": {
+              "tamper_iou": 0.25,
+              "bg_iou": 99.35,
+              "miou": 49.8,
+              "precision": 0.84,
+              "recall": 0.36,
+              "f1": 0.5,
+              "fnr": 99.64
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 3,
+              "fp": 2,
+              "tn": 10,
+              "fn": 15,
+              "accuracy": 43.33,
+              "precision": 60.0,
+              "recall": 16.67,
+              "f1": 26.09,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 83.33,
+              "roc_auc": 50.46
+            }
+          }
+        }
+      },
+      "early_exit": {
+        "by_tau": {
+          "0.2": {
+            "avg_tiles": 4.2,
+            "avg_tiles_tampered": 4.22,
+            "avg_latency_ms": 4481.6,
+            "avg_latency_tampered_ms": 4511.4,
+            "pixel": {
+              "tamper_iou": 2.85,
+              "bg_iou": 99.11,
+              "miou": 50.98,
+              "precision": 5.35,
+              "recall": 5.75,
+              "f1": 5.54,
+              "fnr": 94.25
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 6,
+              "fp": 4,
+              "tn": 8,
+              "fn": 12,
+              "accuracy": 46.67,
+              "precision": 60.0,
+              "recall": 33.33,
+              "f1": 42.86,
+              "specificity": 66.67,
+              "fpr": 33.33,
+              "fnr": 66.67,
+              "roc_auc": 48.61
+            }
+          },
+          "0.3": {
+            "avg_tiles": 4.63,
+            "avg_tiles_tampered": 4.56,
+            "avg_latency_ms": 4936.5,
+            "avg_latency_tampered_ms": 4860.0,
+            "pixel": {
+              "tamper_iou": 2.15,
+              "bg_iou": 99.21,
+              "miou": 50.68,
+              "precision": 4.71,
+              "recall": 3.79,
+              "f1": 4.2,
+              "fnr": 96.21
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 5,
+              "fp": 2,
+              "tn": 10,
+              "fn": 13,
+              "accuracy": 50.0,
+              "precision": 71.43,
+              "recall": 27.78,
+              "f1": 40.0,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 72.22,
+              "roc_auc": 49.54
+            }
+          },
+          "0.35": {
+            "avg_tiles": 4.63,
+            "avg_tiles_tampered": 4.56,
+            "avg_latency_ms": 4936.5,
+            "avg_latency_tampered_ms": 4860.0,
+            "pixel": {
+              "tamper_iou": 1.43,
+              "bg_iou": 99.26,
+              "miou": 50.34,
+              "precision": 3.5,
+              "recall": 2.35,
+              "f1": 2.81,
+              "fnr": 97.65
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 1,
+              "missed_regions": 39,
+              "region_recall": 2.5,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 4,
+              "fp": 2,
+              "tn": 10,
+              "fn": 14,
+              "accuracy": 46.67,
+              "precision": 66.67,
+              "recall": 22.22,
+              "f1": 33.33,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 77.78,
+              "roc_auc": 49.54
+            }
+          },
+          "0.5": {
+            "avg_tiles": 4.8,
+            "avg_tiles_tampered": 4.83,
+            "avg_latency_ms": 5112.6,
+            "avg_latency_tampered_ms": 5153.4,
+            "pixel": {
+              "tamper_iou": 0.0,
+              "bg_iou": 99.39,
+              "miou": 49.7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fnr": 100.0
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 0,
+              "missed_regions": 40,
+              "region_recall": 0.0,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 3,
+              "fp": 2,
+              "tn": 10,
+              "fn": 15,
+              "accuracy": 43.33,
+              "precision": 60.0,
+              "recall": 16.67,
+              "f1": 26.09,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 83.33,
+              "roc_auc": 50.0
+            }
+          }
+        }
+      }
+    },
+    "MiT_B2_INT8": {
+      "threads": 8,
+      "avg_tile_ms": 1947.3,
+      "std_tile_ms": 53.0,
+      "full_scan": {
+        "avg_tiles": 5.2,
+        "avg_latency_ms": 10137.0,
+        "median_latency_ms": 11621.4,
+        "p95_latency_ms": 11951.7,
+        "by_tau": {
+          "0.2": {
+            "pixel": {
+              "tamper_iou": 8.79,
+              "bg_iou": 99.09,
+              "miou": 53.94,
+              "precision": 13.91,
+              "recall": 19.26,
+              "f1": 16.16,
+              "fnr": 80.74
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 10,
+              "missed_regions": 30,
+              "region_recall": 25.0,
+              "complete_docs": 3,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 16.67
+            },
+            "image": {
+              "tp": 14,
+              "fp": 5,
+              "tn": 7,
+              "fn": 4,
+              "accuracy": 70.0,
+              "precision": 73.68,
+              "recall": 77.78,
+              "f1": 75.68,
+              "specificity": 58.33,
+              "fpr": 41.67,
+              "fnr": 22.22,
+              "roc_auc": 67.13
+            }
+          },
+          "0.35": {
+            "pixel": {
+              "tamper_iou": 10.63,
+              "bg_iou": 99.34,
+              "miou": 54.99,
+              "precision": 21.71,
+              "recall": 17.24,
+              "f1": 19.22,
+              "fnr": 82.76
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 7,
+              "missed_regions": 33,
+              "region_recall": 17.5,
+              "complete_docs": 1,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 5.56
+            },
+            "image": {
+              "tp": 11,
+              "fp": 3,
+              "tn": 9,
+              "fn": 7,
+              "accuracy": 66.67,
+              "precision": 78.57,
+              "recall": 61.11,
+              "f1": 68.75,
+              "specificity": 75.0,
+              "fpr": 25.0,
+              "fnr": 38.89,
+              "roc_auc": 67.13
+            }
+          },
+          "0.5": {
+            "pixel": {
+              "tamper_iou": 11.17,
+              "bg_iou": 99.46,
+              "miou": 55.32,
+              "precision": 31.28,
+              "recall": 14.8,
+              "f1": 20.1,
+              "fnr": 85.2
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 6,
+              "missed_regions": 34,
+              "region_recall": 15.0,
+              "complete_docs": 1,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 5.56
+            },
+            "image": {
+              "tp": 7,
+              "fp": 2,
+              "tn": 10,
+              "fn": 11,
+              "accuracy": 56.67,
+              "precision": 77.78,
+              "recall": 38.89,
+              "f1": 51.85,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 61.11,
+              "roc_auc": 67.13
+            }
+          }
+        }
+      },
+      "early_exit": {
+        "by_tau": {
+          "0.2": {
+            "avg_tiles": 3.0,
+            "avg_tiles_tampered": 2.67,
+            "avg_latency_ms": 5846.8,
+            "avg_latency_tampered_ms": 5205.8,
+            "pixel": {
+              "tamper_iou": 7.87,
+              "bg_iou": 99.33,
+              "miou": 53.6,
+              "precision": 17.3,
+              "recall": 12.63,
+              "f1": 14.6,
+              "fnr": 87.37
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 8,
+              "missed_regions": 32,
+              "region_recall": 20.0,
+              "complete_docs": 2,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 11.11
+            },
+            "image": {
+              "tp": 14,
+              "fp": 5,
+              "tn": 7,
+              "fn": 4,
+              "accuracy": 70.0,
+              "precision": 73.68,
+              "recall": 77.78,
+              "f1": 75.68,
+              "specificity": 58.33,
+              "fpr": 41.67,
+              "fnr": 22.22,
+              "roc_auc": 67.59
+            }
+          },
+          "0.35": {
+            "avg_tiles": 3.6,
+            "avg_tiles_tampered": 3.17,
+            "avg_latency_ms": 7008.9,
+            "avg_latency_tampered_ms": 6172.0,
+            "pixel": {
+              "tamper_iou": 6.77,
+              "bg_iou": 99.41,
+              "miou": 53.09,
+              "precision": 19.52,
+              "recall": 9.39,
+              "f1": 12.68,
+              "fnr": 90.61
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 6,
+              "missed_regions": 34,
+              "region_recall": 15.0,
+              "complete_docs": 1,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 5.56
+            },
+            "image": {
+              "tp": 11,
+              "fp": 3,
+              "tn": 9,
+              "fn": 7,
+              "accuracy": 66.67,
+              "precision": 78.57,
+              "recall": 61.11,
+              "f1": 68.75,
+              "specificity": 75.0,
+              "fpr": 25.0,
+              "fnr": 38.89,
+              "roc_auc": 64.35
+            }
+          },
+          "0.5": {
+            "avg_tiles": 4.0,
+            "avg_tiles_tampered": 3.61,
+            "avg_latency_ms": 7778.2,
+            "avg_latency_tampered_ms": 7024.6,
+            "pixel": {
+              "tamper_iou": 6.16,
+              "bg_iou": 99.5,
+              "miou": 52.83,
+              "precision": 29.15,
+              "recall": 7.24,
+              "f1": 11.6,
+              "fnr": 92.76
+            },
+            "region": {
+              "total_gt_regions": 40,
+              "detected_regions": 4,
+              "missed_regions": 36,
+              "region_recall": 10.0,
+              "complete_docs": 0,
+              "total_tamp_docs": 18,
+              "complete_doc_rate": 0.0
+            },
+            "image": {
+              "tp": 7,
+              "fp": 2,
+              "tn": 10,
+              "fn": 11,
+              "accuracy": 56.67,
+              "precision": 77.78,
+              "recall": 38.89,
+              "f1": 51.85,
+              "specificity": 83.33,
+              "fpr": 16.67,
+              "fnr": 61.11,
+              "roc_auc": 65.28
+            }
+          }
+        }
+      }
+    }
+  }
+}

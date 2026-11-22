@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bảng So Sánh Số Liệu Máy Học — Full-Scan vs Early Exit, M1–M4 & MiT-B2 vs MiT-B0</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 24px 16px 60px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; }
+    .header-box h1 { margin: 0 0 6px; font-size: 20px; color: #38bdf8; }
+    .header-box p { margin: 0; font-size: 13.5px; color: #cbd5e1; }
+    .card { background: #ffffff; color: #000000; border-radius: 12px; margin-bottom: 26px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+    .card-bar { display: flex; align-items: center; justify-content: space-between; background: #1e293b; color: #fff; padding: 12px 18px; gap: 12px; }
+    .card-title { font-weight: 700; font-size: 14.5px; color: #7dd3fc; }
+    .btn-copy { background: #2563eb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .btn-copy:hover { background: #1d4ed8; }
+    .btn-copy.copied { background: #10b981; }
+    .doc-area { padding: 20px 24px; font-family: Arial, sans-serif; font-size: 10.5pt; color: #000000; overflow-x: auto; }
+    .doc-area table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 9.5pt; margin: 8px 0 12px; }
+    .doc-area th, .doc-area td { padding: 6px 7px; text-align: center; border: none; }
+    .doc-area tr.top-rule th, .doc-area tr.top-rule td { border-top: 1.5pt solid #000000; border-bottom: 0.75pt solid #000000; font-weight: bold; }
+    .doc-area tr.mid-rule th, .doc-area tr.mid-rule td { border-bottom: 1pt solid #000000; font-weight: bold; }
+    .doc-area tr.bot-rule td { border-bottom: 1.5pt solid #000000; }
+    .doc-area tr.sep-row td { border-top: 0.5pt dashed #666666; }
+    .left { text-align: left !important; }
+    .note { font-size: 9.5pt; color: #333333; margin-top: 6px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header-box">
+    <h1>📊 Bộ Bảng Số Liệu Máy Học Chuẩn Báo Cáo (Không Dùng Early Exit — Full-Scan)</h1>
+    <p>Bấm nút <b>📋 Copy vào Google Docs</b> ở từng bảng rồi nhấn <b>Ctrl + V</b> vào tài liệu Word / Google Docs (giữ nguyên định dạng bảng 3 đường kẻ chuẩn bài báo IEEE/Elsevier).</p>
+  </div>
+
+  <!-- BẢNG 1: THỐNG KÊ DỮ LIỆU & ĐỐI CHỨNG EARLY EXIT VS FULL-SCAN -->
+  <div class="card">
+    <div class="card-bar">
+      <span class="card-title">BẢNG 1 — Chứng minh bỏ Early Exit: So sánh Early Exit vs Full-Scan (30 ảnh thật: 18 đa vùng / 40 vùng GT + 12 ảnh gốc)</span>
+      <button class="btn-copy" onclick="copyBlock('tbl1', this)">📋 Copy Bảng 1 vào Google Docs</button>
+    </div>
+    <div class="doc-area" id="tbl1">
+      <p><b>Table A.</b> <i>Thống kê đặc trưng đa vùng trên toàn tập kiểm định RealTextMan/val.txt (1,203 ảnh giả mạo, lưới 512×512):</i> <b>2,138 vùng giả mạo</b> (TB 1.78 vùng/ảnh); <b>582/1,203 ảnh (48.4%)</b> có ≥ 2 vùng giả mạo độc lập; <b>1,058/1,203 ảnh (87.9%)</b> có vết giả mạo trải trên ≥ 2 tile; TB <b>8.31 tile/ảnh</b> (trung vị 8.0, tối đa 20); tỷ lệ pixel giả mạo <b>1.1310%</b>.</p>
+      <p><b>Table B.</b> <i>Thực nghiệm đối chứng Early Exit vs Full-Scan (Không Early Exit) trên 30 tài liệu thật (18 giả mạo đa vùng trải đều 6 dạng tấn công với 40 vùng GT + 12 ảnh gốc, 158 tiles, CPU i5-12400F 8 luồng ORT 1.19.2).</i></p>
+      <table>
+        <tr class="top-rule">
+          <td colspan="3">Cấu hình đánh giá</td>
+          <td colspan="5">Chỉ số Cấp Điểm ảnh — Pixel (%)</td>
+          <td colspan="2">Độ phủ Đa vùng</td>
+          <td colspan="3">Phân loại Cấp ảnh (%)</td>
+          <td colspan="2">Chi phí Quét</td>
+        </tr>
+        <tr class="mid-rule">
+          <td>Mô hình</td>
+          <td>Ngưỡng &tau;</td>
+          <td>Chế độ</td>
+          <td>Tamper IoU</td>
+          <td>mIoU</td>
+          <td>Prec</td>
+          <td>Recall</td>
+          <td>F1</td>
+          <td>Region Recall</td>
+          <td>Đủ 100%/ảnh</td>
+          <td>Acc</td>
+          <td>F1</td>
+          <td>ROC-AUC</td>
+          <td>Tiles</td>
+          <td>Độ trễ</td>
+        </tr>
+        <tr>
+          <td class="left">MiT-B2 INT8</td><td>0.50</td><td class="left">Early Exit</td>
+          <td>6.16</td><td>52.83</td><td>29.15</td><td>7.24</td><td>11.60</td>
+          <td>10.0% (4/40)</td><td>0.0% (0/18)</td>
+          <td>56.67</td><td>51.85</td><td>65.28</td><td>4.00</td><td>7.78s</td>
+        </tr>
+        <tr>
+          <td class="left"><b>MiT-B2 INT8</b></td><td><b>0.50</b></td><td class="left"><b>Full-Scan (No EE)</b></td>
+          <td><b>11.17</b></td><td><b>55.32</b></td><td><b>31.28</b></td><td><b>14.80</b></td><td><b>20.10</b></td>
+          <td><b>15.0% (6/40)</b></td><td><b>5.6% (1/18)</b></td>
+          <td>56.67</td><td>51.85</td><td><b>67.13</b></td><td>5.20</td><td>10.14s</td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">MiT-B2 INT8</td><td>0.35</td><td class="left">Early Exit</td>
+          <td>6.77</td><td>53.09</td><td>19.52</td><td>9.39</td><td>12.68</td>
+          <td>15.0% (6/40)</td><td>5.6% (1/18)</td>
+          <td>66.67</td><td>68.75</td><td>64.35</td><td>3.60</td><td>7.01s</td>
+        </tr>
+        <tr>
+          <td class="left"><b>MiT-B2 INT8</b></td><td><b>0.35</b></td><td class="left"><b>Full-Scan (No EE)</b></td>
+          <td><b>10.63</b></td><td><b>54.99</b></td><td><b>21.71</b></td><td><b>17.24</b></td><td><b>19.22</b></td>
+          <td><b>17.5% (7/40)</b></td><td><b>5.6% (1/18)</b></td>
+          <td>66.67</td><td>68.75</td><td><b>67.13</b></td><td>5.20</td><td>10.14s</td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">MiT-B2 INT8</td><td>0.20</td><td class="left">Early Exit</td>
+          <td>7.87</td><td>53.60</td><td>17.30</td><td>12.63</td><td>14.60</td>
+          <td>20.0% (8/40)</td><td>11.1% (2/18)</td>
+          <td>70.00</td><td>75.68</td><td>67.59</td><td>3.00</td><td>5.85s</td>
+        </tr>
+        <tr>
+          <td class="left"><b>MiT-B2 INT8</b></td><td><b>0.20</b></td><td class="left"><b>Full-Scan (No EE)</b></td>
+          <td><b>8.79</b></td><td><b>53.94</b></td><td>13.91</td><td><b>19.26</b></td><td><b>16.16</b></td>
+          <td><b>25.0% (10/40)</b></td><td><b>16.7% (3/18)</b></td>
+          <td><b>70.00</b></td><td><b>75.68</b></td><td>67.13</td><td>5.20</td><td>10.14s</td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">MiT-B0 INT8</td><td>0.50</td><td class="left">Early Exit</td>
+          <td>0.00</td><td>49.70</td><td>0.00</td><td>0.00</td><td>0.00</td>
+          <td>0.0% (0/40)</td><td>0.0% (0/18)</td>
+          <td>43.33</td><td>26.09</td><td>50.00</td><td>4.80</td><td>5.11s</td>
+        </tr>
+        <tr>
+          <td class="left"><b>MiT-B0 INT8</b></td><td><b>0.50</b></td><td class="left"><b>Full-Scan (No EE)</b></td>
+          <td><b>0.25</b></td><td><b>49.80</b></td><td><b>0.84</b></td><td><b>0.36</b></td><td><b>0.50</b></td>
+          <td><b>2.5% (1/40)</b></td><td>0.0% (0/18)</td>
+          <td>43.33</td><td>26.09</td><td><b>50.46</b></td><td>5.20</td><td>5.54s</td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">MiT-B0 INT8</td><td>0.20</td><td class="left">Early Exit</td>
+          <td>2.85</td><td>50.98</td><td>5.35</td><td>5.75</td><td>5.54</td>
+          <td>2.5% (1/40)</td><td>0.0% (0/18)</td>
+          <td>46.67</td><td>42.86</td><td>48.61</td><td>4.20</td><td>4.48s</td>
+        </tr>
+        <tr class="bot-rule">
+          <td class="left"><b>MiT-B0 INT8</b></td><td><b>0.20</b></td><td class="left"><b>Full-Scan (No EE)</b></td>
+          <td>2.29</td><td>50.50</td><td>3.39</td><td><b>6.61</b></td><td>4.48</td>
+          <td><b>5.0% (2/40)</b></td><td>0.0% (0/18)</td>
+          <td>46.67</td><td>42.86</td><td><b>50.46</b></td><td>5.20</td><td>5.54s</td>
+        </tr>
+      </table>
+      <p class="note"><b>Nhận xét:</b> Tắt Early Exit sang Full-Scan trên MiT-B2 INT8 tại &tau;=0.50 giúp <b>Pixel Recall tăng +104.4%</b> (7.24% &rarr; 14.80%), <b>Tamper IoU tăng +81.3%</b> (6.16% &rarr; 11.17%), <b>F1 tăng +73.3%</b> (11.60% &rarr; 20.10%) và <b>Region Recall tăng +50%</b> (10.0% &rarr; 15.0%).</p>
+    </div>
+  </div>
+
+  <!-- BẢNG 2: SO SÁNH TOÀN DIỆN MIT-B2 VS MIT-B0 TRÊN FULL VAL 1203 ẢNH -->
+  <div class="card">
+    <div class="card-bar">
+      <span class="card-title">BẢNG 2 — So sánh độ chính xác Full-Scan trên 1,203 ảnh chuẩn RealTextMan/val.txt (M1–M4, MiT-B0 30k, MiT-B2 30k &amp; Paper gốc)</span>
+      <button class="btn-copy" onclick="copyBlock('tbl2', this)">📋 Copy Bảng 2 vào Google Docs</button>
+    </div>
+    <div class="doc-area" id="tbl2">
+      <p><b>Table C.</b> <i>So sánh độ chính xác học máy ở chế độ Full-Scan Sliding-Window (không Early Exit) trên toàn tập RealTextMan/val.txt (1,203 ảnh).</i></p>
+      <table>
+        <tr class="top-rule">
+          <td colspan="4">Mô hình &amp; Giao thức huấn luyện</td>
+          <td colspan="2">IoU (%)</td>
+          <td colspan="3">Pixel Metric (%)</td>
+          <td colspan="1">Tài nguyên</td>
+        </tr>
+        <tr class="mid-rule">
+          <td>Phương pháp</td>
+          <td>Backbone</td>
+          <td>Mẫu train</td>
+          <td>Ngưỡng &tau;</td>
+          <td>Tamper IoU</td>
+          <td>mIoU</td>
+          <td>Precision</td>
+          <td>Recall</td>
+          <td>F1 / Dice</td>
+          <td>Train VRAM</td>
+        </tr>
+        <tr>
+          <td class="left">M1 — Baseline 2-Stream (16k)</td><td>MiT-B0 (2 luồng)</td><td>32k (16k&times;2)</td><td>0.050*</td>
+          <td>4.20</td><td>50.63</td><td>6.24</td><td>11.40</td><td>8.06</td><td>2,288 MB</td>
+        </tr>
+        <tr>
+          <td class="left">M2 — +Tri-Stream OCR (16k)</td><td>MiT-B0 (3 luồng)</td><td>32k (16k&times;2)</td><td>0.040*</td>
+          <td>3.77</td><td>50.18</td><td>5.24</td><td>11.84</td><td>7.27</td><td>3,040 MB</td>
+        </tr>
+        <tr>
+          <td class="left">M3 — +Focused Crop (16k)</td><td>MiT-B0 (3 luồng)</td><td>32k (16k&times;2)</td><td>0.100*</td>
+          <td>4.30</td><td>50.68</td><td>6.37</td><td>11.72</td><td>8.25</td><td>3,088 MB</td>
+        </tr>
+        <tr>
+          <td class="left">M4 — +Dual Prototype (16k)</td><td>MiT-B0 (3 luồng)</td><td>32k (16k&times;2)</td><td>0.150* (0.50)</td>
+          <td>4.43 (0.84)</td><td>50.99 (49.85)</td><td>7.37 (53.49)</td><td>10.01 (0.84)</td><td>8.49 (1.66)</td><td>2,984 MB</td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left"><b>Ours — MiT-B0 30k Mobile</b> (Iter 20k)</td><td>MiT-B0 (3 luồng)</td><td>120k (30k&times;4)</td><td>0.500</td>
+          <td>4.11</td><td>51.44</td><td>25.06</td><td>4.69</td><td>7.90</td><td><b>5,726 MB</b></td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">ASC-Former (Paper gốc, PR 2025)</td><td>MiT-B2 (2 luồng)</td><td>960k (80k&times;12)</td><td>0.500</td>
+          <td>19.71</td><td>~59.10</td><td><b>50.44</b></td><td>24.44</td><td>32.93</td><td>Multi-GPU</td>
+        </tr>
+        <tr>
+          <td class="left">Ours — MiT-B2 30k SOTA</td><td>MiT-B2 (3 luồng)</td><td>240k (30k&times;8)</td><td>0.500</td>
+          <td>19.13</td><td>59.00</td><td>50.27</td><td>23.60</td><td>32.12</td><td>22,950 MB</td>
+        </tr>
+        <tr>
+          <td class="left">Ours — MiT-B2 30k SOTA</td><td>MiT-B2 (3 luồng)</td><td>240k (30k&times;8)</td><td>0.400</td>
+          <td>19.84</td><td><b>59.31</b></td><td>43.55</td><td>26.71</td><td>33.11</td><td>22,950 MB</td>
+        </tr>
+        <tr class="bot-rule">
+          <td class="left"><b>Ours — MiT-B2 30k SOTA (Peak &tau;*)</b></td><td><b>MiT-B2 (3 luồng)</b></td><td><b>240k (30k&times;8)</b></td><td><b>0.350</b></td>
+          <td><b>19.91</b></td><td>59.30</td><td>39.85</td><td><b>28.46</b></td><td><b>33.20</b></td><td>22,950 MB</td>
+        </tr>
+      </table>
+      <p class="note"><i>*Ghi chú:</i> Ở mức 16k iters, M1–M3 có Tamper IoU = 0.00% tại &tau;=0.500; chỉ M4 (+Dual Prototype) đạt 0.84% IoU và 53.49% Precision ngay tại &tau;=0.500. Khi huấn luyện đầy đủ 30k iters, MiT-B2 (chỉ dùng 25% số mẫu train so với paper gốc) vượt chuẩn ASC-Former về IoU (19.91% vs 19.71%), Recall (28.46% vs 24.44%) và F1 (33.20% vs 32.93%).</p>
+    </div>
+  </div>
+
+  <!-- BẢNG 3: ĐỘ PHỨC TẠP, LƯỢNG TỬ HÓA & THỜI GIAN FULL-SCAN B2 VS B0 -->
+  <div class="card">
+    <div class="card-bar">
+      <span class="card-title">BẢNG 3 — So sánh Chi phí Tính toán, Lượng tử hóa &amp; Thời gian Quét Full-Scan: MiT-B2 vs MiT-B0 (FP32 &amp; INT8)</span>
+      <button class="btn-copy" onclick="copyBlock('tbl3', this)">📋 Copy Bảng 3 vào Google Docs</button>
+    </div>
+    <div class="doc-area" id="tbl3">
+      <p><b>Table D.</b> <i>So sánh độ phức tạp mô hình, sai số lượng tử hóa và chi phí suy luận Full-Scan (không Early Exit) đo độc lập trên Intel Core i5-12400F (ONNX Runtime 1.19.2 CPU) &amp; PyTorch FlopCounterMode (512×512).</i></p>
+      <table>
+        <tr class="top-rule">
+          <td class="left">Tiêu chí đo đạc</td>
+          <td>MiT-B2 FP32</td>
+          <td>MiT-B2 INT8</td>
+          <td>MiT-B0 FP32</td>
+          <td>MiT-B0 INT8</td>
+          <td>B0 INT8 vs B2 INT8</td>
+        </tr>
+        <tr class="mid-rule">
+          <td class="left">Kiến trúc On-Device Tri-Stream</td>
+          <td colspan="2">Backbone MiT-B2 + NATFuser + ProtoHead</td>
+          <td colspan="2">Backbone MiT-B0 + NATFuser + ProtoHead</td>
+          <td>Mức thay đổi</td>
+        </tr>
+        <tr>
+          <td class="left">Tổng tham số PyTorch (ONNX Initializers)</td>
+          <td>123.07M (121.92M)</td><td>123.07M (121.92M)</td><td>25.84M (25.55M)</td><td><b>25.84M (25.55M)</b></td><td><b>Nhẹ hơn 4.76&times; (-79.0%)</b></td>
+        </tr>
+        <tr>
+          <td class="left">Độ phức tạp tính toán (GFLOPs / tile 512&times;512)</td>
+          <td>384.75</td><td>384.75</td><td>231.48</td><td><b>231.48</b></td><td><b>Giảm 1.66&times; (-39.8%)</b></td>
+        </tr>
+        <tr>
+          <td class="left">Dung lượng file ONNX trên đĩa</td>
+          <td>524.44 MB</td><td>192.92 MB</td><td>129.22 MB</td><td><b>60.78 MB</b></td><td><b>Nhẹ hơn 3.17&times; (-68.5%)</b></td>
+        </tr>
+        <tr>
+          <td class="left">RAM đỉnh khi suy luận (Peak RSS, 4 luồng)</td>
+          <td>1,321.0 MB</td><td>1,181.9 MB</td><td><b>701.4 MB</b></td><td>808.6 MB</td><td><b>Tiết kiệm 31.6% RAM</b></td>
+        </tr>
+        <tr>
+          <td class="left">Độ trễ 1 tile 512&times;512 — CPU 4 luồng</td>
+          <td>2,036.0 &plusmn; 13.3 ms</td><td>1,904.8 &plusmn; 58.7 ms</td><td><b>1,097.8 &plusmn; 57.0 ms</b></td><td>1,140.8 &plusmn; 73.8 ms</td><td><b>Nhanh hơn 1.67&times;</b></td>
+        </tr>
+        <tr>
+          <td class="left">Độ trễ 1 tile 512&times;512 — CPU 8 luồng</td>
+          <td>2,014.9 &plusmn; 9.0 ms</td><td>1,864.2 &plusmn; 62.7 ms</td><td>1,188.5 &plusmn; 42.3 ms</td><td><b>955.1 &plusmn; 59.7 ms</b></td><td><b>Nhanh hơn 1.95&times;</b></td>
+        </tr>
+        <tr>
+          <td class="left">Full-Scan 4 tiles (~700–900 px, 8T / 4T)</td>
+          <td>8.06s / 8.14s</td><td>7.46s / 7.62s</td><td>4.75s / 4.39s</td><td><b>3.82s / 4.56s</b></td><td><b>Nhanh hơn 1.95&times; (8T)</b></td>
+        </tr>
+        <tr>
+          <td class="left">Full-Scan 8 tiles (Trung vị RTM, 8T / 4T)</td>
+          <td>16.12s / 16.29s</td><td>14.91s / 15.24s</td><td>9.51s / 8.78s</td><td><b>7.64s / 9.13s</b></td><td><b>Giảm 7.27s (8T)</b></td>
+        </tr>
+        <tr>
+          <td class="left">Full-Scan 12 tiles (Trang A4 ~1500 px, 8T / 4T)</td>
+          <td>24.18s / 24.43s</td><td>22.37s / 22.86s</td><td>14.26s / 13.17s</td><td><b>11.46s / 13.69s</b></td><td><b>Giảm 10.91s (8T)</b></td>
+        </tr>
+        <tr>
+          <td class="left">Full-Scan 16 tiles (Scan ~2000 px, 8T / 4T)</td>
+          <td>32.24s / 32.58s</td><td>29.83s / 30.48s</td><td>19.02s / 17.56s</td><td><b>15.28s / 18.25s</b></td><td><b>Giảm 14.55s (8T)</b></td>
+        </tr>
+        <tr class="sep-row">
+          <td class="left">Sai số lượng tử hóa FP32&rarr;INT8: MAE / RMSE</td>
+          <td>0 / 0</td><td>0.00407 / 0.01097</td><td>0 / 0</td><td><b>0.00127 / 0.00334</b></td><td>B0 ít sai số lượng tử hơn 3.2&times;</td>
+        </tr>
+        <tr class="bot-rule">
+          <td class="left">Tương quan xác suất FP32&rarr;INT8 (Pearson r / MaxDiff)</td>
+          <td>1.0000 / 0.000</td><td>0.9783 / 0.1791</td><td>1.0000 / 0.000</td><td><b>0.9960 / 0.0416</b></td><td><b>Bảo toàn 99.6% phân bố</b></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function copyBlock(id, btn) {
+  const el = document.getElementById(id);
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html": new Blob([el.innerHTML], { type: "text/html" }),
+        "text/plain": new Blob([el.innerText], { type: "text/plain" })
+      })
+    ]);
+  } catch (e) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+  }
+  const orig = btn.innerText;
+  btn.classList.add("copied");
+  btn.innerText = "✅ Đã Copy! Nhấn Ctrl+V vào Google Docs";
+  setTimeout(() => { btn.classList.remove("copied"); btn.innerText = orig; }, 2500);
+}
+</script>
+</body>
+</html>
