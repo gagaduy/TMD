@@ -424,6 +424,16 @@ class RandomRotate(BaseTransform):
                     center=self.center,
                     auto_bound=self.auto_bound,
                     interpolation='nearest')
+
+            # rotate ocr spatial map synchronously if loaded before rotation
+            if results.get('ocr', None) is not None:
+                results['ocr'] = mmcv.imrotate(
+                    results['ocr'],
+                    angle=degree,
+                    border_value=0,
+                    center=self.center,
+                    auto_bound=self.auto_bound,
+                    interpolation='nearest')
         return results
 
     def __repr__(self):
@@ -3707,6 +3717,16 @@ class RandomRotate90(BaseTransform):
                     results[key],
                     angle=degree,
                     border_value=self.seg_pad_val,
+                    center=self.center,
+                    auto_bound=self.auto_bound,
+                    interpolation='nearest')
+
+            # rotate ocr spatial map synchronously if loaded before rotation
+            if results.get('ocr', None) is not None:
+                results['ocr'] = mmcv.imrotate(
+                    results['ocr'],
+                    angle=degree,
+                    border_value=0,
                     center=self.center,
                     auto_bound=self.auto_bound,
                     interpolation='nearest')
