@@ -263,7 +263,6 @@ class OnDeviceRTMModel(nn.Module):
                 conv_x = F.interpolate(conv_x, size=target_size, mode='bilinear', align_corners=False)
             outs.append(conv_x)
         out = dh.fusion_conv(torch.cat(outs, dim=1))
-        feats = dh.cc_proj(out)
         seg_out = out
         if getattr(dh, 'up_decode', True):
             up_size = (target_size[0] * 2, target_size[1] * 2)
@@ -271,15 +270,17 @@ class OnDeviceRTMModel(nn.Module):
         seg_out = dh.seg_proj(seg_out)
         seg_logits = dh.cls_seg(seg_out)
 
-        feats_norm = F.normalize(feats, dim=1)
-        prototypes = F.normalize(dh.prototypes, dim=1)
-        proto_logits = torch.einsum('bchw, kc -> bkhw', feats_norm, prototypes) / float(dh.temperature)
-        logit_size = (int(seg_logits.shape[2]), int(seg_logits.shape[3]))
-        if proto_logits.shape[2] != logit_size[0] or proto_logits.shape[3] != logit_size[1]:
-            proto_logits = F.interpolate(proto_logits, size=logit_size, mode='bilinear', align_corners=False)
         raw_alpha = getattr(dh, 'proto_fuse_weight', 0.5)
         alpha = float(torch.clamp(raw_alpha.detach(), 0.0, 1.0).item()) if isinstance(raw_alpha, torch.Tensor) else float(raw_alpha)
-        seg_logits = seg_logits + alpha * proto_logits
+        if alpha > 1e-6 and hasattr(dh, 'prototypes'):
+            feats = dh.cc_proj(out)
+            feats_norm = F.normalize(feats, dim=1)
+            prototypes = F.normalize(dh.prototypes, dim=1)
+            proto_logits = torch.einsum('bchw, kc -> bkhw', feats_norm, prototypes) / float(dh.temperature)
+            logit_size = (int(seg_logits.shape[2]), int(seg_logits.shape[3]))
+            if proto_logits.shape[2] != logit_size[0] or proto_logits.shape[3] != logit_size[1]:
+                proto_logits = F.interpolate(proto_logits, size=logit_size, mode='bilinear', align_corners=False)
+            seg_logits = seg_logits + alpha * proto_logits
         return seg_logits
 
 

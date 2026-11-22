@@ -1,0 +1,210 @@
+{
+  "M1_Baseline_2Stream": {
+    "id": "M1",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": false,
+      "bal_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.7482,
+      "tampered_precision": 13.9866,
+      "tampered_recall": 11.5352,
+      "tampered_dice": 12.6432,
+      "bg_iou": 98.1948,
+      "m_iou": 52.4715
+    }
+  },
+  "M2_RealOCR_3Stream": {
+    "id": "M2",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": false,
+      "bal_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.7744,
+      "tampered_precision": 11.7961,
+      "tampered_recall": 13.7285,
+      "tampered_dice": 12.6892,
+      "bg_iou": 97.8599,
+      "m_iou": 52.3172
+    }
+  },
+  "M3_Focused_Rotate90": {
+    "id": "M3",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": true,
+      "bal_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.2,
+      "tampered_iou": 11.7371,
+      "tampered_precision": 25.9362,
+      "tampered_recall": 17.6541,
+      "tampered_dice": 21.0084,
+      "bg_iou": 98.4955,
+      "m_iou": 55.1163
+    }
+  },
+  "M4_BalancedProto_256": {
+    "id": "M4",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": false,
+      "bal_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.2456,
+      "tampered_precision": 57.8804,
+      "tampered_recall": 0.246,
+      "tampered_dice": 0.49,
+      "bg_iou": 98.8697,
+      "m_iou": 49.5577
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.0691,
+      "tampered_precision": 11.6357,
+      "tampered_recall": 11.258,
+      "tampered_dice": 11.4437,
+      "bg_iou": 98.0268,
+      "m_iou": 52.048
+    }
+  },
+  "M5_RealOCR_Focused_Rotate90": {
+    "id": "M5",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": true,
+      "bal_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 6.8593,
+      "tampered_precision": 38.3516,
+      "tampered_recall": 7.7094,
+      "tampered_dice": 12.8381,
+      "bg_iou": 98.815,
+      "m_iou": 52.8372
+    },
+    "peak": {
+      "threshold": 0.15,
+      "tampered_iou": 9.8775,
+      "tampered_precision": 18.3307,
+      "tampered_recall": 17.6407,
+      "tampered_dice": 17.9791,
+      "bg_iou": 98.1759,
+      "m_iou": 54.0267
+    }
+  },
+  "M6_RealOCR_BalancedProto_256": {
+    "id": "M6",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": false,
+      "bal_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.1441,
+      "tampered_precision": 12.4388,
+      "tampered_recall": 10.8266,
+      "tampered_dice": 11.5768,
+      "bg_iou": 98.1272,
+      "m_iou": 52.1356
+    }
+  },
+  "M7_Focused_Rotate90_BalancedProto_256": {
+    "id": "M7",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": true,
+      "bal_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 8.3835,
+      "tampered_precision": 45.428,
+      "tampered_recall": 9.3223,
+      "tampered_dice": 15.47,
+      "bg_iou": 98.8466,
+      "m_iou": 53.615
+    },
+    "peak": {
+      "threshold": 0.2,
+      "tampered_iou": 12.437,
+      "tampered_precision": 26.1771,
+      "tampered_recall": 19.1556,
+      "tampered_dice": 22.1226,
+      "bg_iou": 98.4713,
+      "m_iou": 55.4542
+    }
+  },
+  "M8_Full_OCR_Focused_BalancedProto_256": {
+    "id": "M8",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": true,
+      "bal_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 6.612,
+      "tampered_precision": 46.6539,
+      "tampered_recall": 7.1528,
+      "tampered_dice": 12.4038,
+      "bg_iou": 98.8565,
+      "m_iou": 52.7342
+    },
+    "peak": {
+      "threshold": 0.2,
+      "tampered_iou": 10.2614,
+      "tampered_precision": 20.3181,
+      "tampered_recall": 17.1717,
+      "tampered_dice": 18.6128,
+      "bg_iou": 98.2982,
+      "m_iou": 54.2798
+    }
+  }
+}

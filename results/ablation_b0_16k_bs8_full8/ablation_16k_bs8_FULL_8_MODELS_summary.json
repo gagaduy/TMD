@@ -1,0 +1,210 @@
+{
+  "M1_Baseline_2Stream": {
+    "id": "M1",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": false,
+      "lite_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.7482,
+      "tampered_precision": 13.9866,
+      "tampered_recall": 11.5352,
+      "tampered_dice": 12.6432,
+      "bg_iou": 98.1948,
+      "m_iou": 52.4715
+    }
+  },
+  "M2_RealOCR_3Stream": {
+    "id": "M2",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": false,
+      "lite_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 6.7744,
+      "tampered_precision": 11.7961,
+      "tampered_recall": 13.7285,
+      "tampered_dice": 12.6892,
+      "bg_iou": 97.8599,
+      "m_iou": 52.3172
+    }
+  },
+  "M3_Focused_Rotate90": {
+    "id": "M3",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": true,
+      "lite_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.2,
+      "tampered_iou": 11.7371,
+      "tampered_precision": 25.9362,
+      "tampered_recall": 17.6541,
+      "tampered_dice": 21.0084,
+      "bg_iou": 98.4955,
+      "m_iou": 55.1163
+    }
+  },
+  "M4_LiteProto_CE": {
+    "id": "M4",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": false,
+      "lite_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.06,
+      "tampered_iou": 4.6089,
+      "tampered_precision": 7.1707,
+      "tampered_recall": 11.4267,
+      "tampered_dice": 8.8117,
+      "bg_iou": 97.3217,
+      "m_iou": 50.9653
+    }
+  },
+  "M5_RealOCR_Focused_Rotate90": {
+    "id": "M5",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": true,
+      "lite_proto": false
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 6.8593,
+      "tampered_precision": 38.3516,
+      "tampered_recall": 7.7094,
+      "tampered_dice": 12.8381,
+      "bg_iou": 98.815,
+      "m_iou": 52.8372
+    },
+    "peak": {
+      "threshold": 0.15,
+      "tampered_iou": 9.8775,
+      "tampered_precision": 18.3307,
+      "tampered_recall": 17.6407,
+      "tampered_dice": 17.9791,
+      "bg_iou": 98.1759,
+      "m_iou": 54.0267
+    }
+  },
+  "M6_RealOCR_LiteProto_CE": {
+    "id": "M6",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": false,
+      "lite_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 0.0,
+      "tampered_precision": 0.0,
+      "tampered_recall": 0.0,
+      "tampered_dice": 0.0,
+      "bg_iou": 98.869,
+      "m_iou": 49.4345
+    },
+    "peak": {
+      "threshold": 0.08,
+      "tampered_iou": 4.3935,
+      "tampered_precision": 7.2681,
+      "tampered_recall": 9.9981,
+      "tampered_dice": 8.4172,
+      "bg_iou": 97.5365,
+      "m_iou": 50.965
+    }
+  },
+  "M7_Focused_Rotate90_LiteProto_CE": {
+    "id": "M7",
+    "factors": {
+      "ocr": false,
+      "focused_rot90": true,
+      "lite_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 5.0346,
+      "tampered_precision": 37.661,
+      "tampered_recall": 5.4923,
+      "tampered_dice": 9.5866,
+      "bg_iou": 98.8276,
+      "m_iou": 51.9311
+    },
+    "peak": {
+      "threshold": 0.15,
+      "tampered_iou": 7.9838,
+      "tampered_precision": 14.125,
+      "tampered_recall": 15.5142,
+      "tampered_dice": 14.7871,
+      "bg_iou": 97.9741,
+      "m_iou": 52.979
+    }
+  },
+  "M8_Full_OCR_Focused_LiteProto_CE": {
+    "id": "M8",
+    "factors": {
+      "ocr": true,
+      "focused_rot90": true,
+      "lite_proto": true
+    },
+    "tau_050": {
+      "threshold": 0.5,
+      "tampered_iou": 4.5566,
+      "tampered_precision": 41.2413,
+      "tampered_recall": 4.8729,
+      "tampered_dice": 8.716,
+      "bg_iou": 98.8449,
+      "m_iou": 51.7008
+    },
+    "peak": {
+      "threshold": 0.2,
+      "tampered_iou": 8.1746,
+      "tampered_precision": 16.0781,
+      "tampered_recall": 14.2584,
+      "tampered_dice": 15.1136,
+      "bg_iou": 98.1856,
+      "m_iou": 53.1801
+    }
+  }
+}
